@@ -8,11 +8,37 @@ public class Level : EventDispatcher, ILevel
 
     private IResolver _resolver;
 
-    public Level(int rows, int columns)
+    public Level()
     {
-        _puzzle = new Puzzle(rows, columns);
         _record = new Record();
         _resolver = new Resolver();
+    }
+
+    public void MakePuzzle(PuzzleParams pp)
+    {
+        _puzzle = new Puzzle(pp.rows, pp.columns);
+        for (int i = 0; i < puzzle.rows; i++)
+        {
+            for (int j = 0; j < puzzle.columns; j++)
+            {
+                _puzzle[i, j] = new Quad(i, j, QuadValue.Front);
+            }
+        }
+        System.Random random = new System.Random();
+        for (int i = 0; i < pp.block; i++)
+        {
+            _puzzle[random.Next(_puzzle.rows), random.Next(_puzzle.columns)].value = QuadValue.Block;
+        }
+        do
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                IOperation operation = new Operation(random.Next(_puzzle.rows), random.Next(_puzzle.columns));
+                _resolver.Apply(_puzzle, operation);
+            }
+        }
+        while (_resolver.IsWin(_puzzle));
+        _record.Clear();
     }
 
     public IPuzzle puzzle

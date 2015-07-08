@@ -3,19 +3,49 @@
     public void Apply(IPuzzle puzzle, IOperation op)
     {
         IQuad[] rowQuads = puzzle.GetRowQuads(op.row);
-        foreach (IQuad quad in rowQuads)
+        for (int i = op.column - 1; i >= 0; i--)
         {
-            if (quad.column != op.column)
+            if (rowQuads[i].value == QuadValue.Block)
             {
-                quad.value = 1 - quad.value;
+                break;
+            }
+            else
+            {
+                rowQuads[i].value = (QuadValue)(QuadValue.Back - rowQuads[i].value);
+            }
+        }
+        for (int i = op.column + 1, len = rowQuads.Length; i < len; i++)
+        {
+            if (rowQuads[i].value == QuadValue.Block)
+            {
+                break;
+            }
+            else
+            {
+                rowQuads[i].value = (QuadValue)(QuadValue.Back - rowQuads[i].value);
             }
         }
         IQuad[] columnQuads = puzzle.GetColumnQuads(op.column);
-        foreach (IQuad quad in columnQuads)
+        for (int i = op.row - 1; i >= 0; i--)
         {
-            if (quad.row != op.row)
+            if (columnQuads[i].value == QuadValue.Block)
             {
-                quad.value = 1 - quad.value;
+                break;
+            }
+            else
+            {
+                columnQuads[i].value = (QuadValue)(QuadValue.Back - columnQuads[i].value);
+            }
+        }
+        for (int i = op.row + 1, len = columnQuads.Length; i < len; i++)
+        {
+            if (columnQuads[i].value == QuadValue.Block)
+            {
+                break;
+            }
+            else
+            {
+                columnQuads[i].value = (QuadValue)(QuadValue.Back - columnQuads[i].value);
             }
         }
     }
@@ -28,11 +58,19 @@
     public bool IsWin(IPuzzle puzzle)
     {
         bool pass = true;
+        QuadValue value = QuadValue.Block;
         for (int i = 0; i < puzzle.rows; i++)
         {
-            for (int j = 1; j < puzzle.columns; j++)
+            for (int j = 0; j < puzzle.columns; j++)
             {
-                if (puzzle[i, j].value != puzzle[0, 0].value)
+                if (value == QuadValue.Block && 
+                    (puzzle[i, j].value == QuadValue.Front || puzzle[i, j].value == QuadValue.Back))
+                {
+                    value = puzzle[i, j].value;
+                }
+                if ((value == QuadValue.Front || value == QuadValue.Back) &&
+                    (puzzle[i, j].value == QuadValue.Front || puzzle[i, j].value == QuadValue.Back) &&
+                    value != puzzle[i, j].value)
                 {
                     pass = false;
                     break;

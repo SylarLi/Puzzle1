@@ -6,8 +6,7 @@ public class PuzzleView : MonoBehaviour
 {
     public const float PuzzleDepth = 20;
     public const float QuadGap = 0.1f;
-    public const float RotateDuration = 0.5f;
-    public const float RotateDelay = 0.05f;
+    public const float RollDelay = 0.05f;
 
     private IPuzzle _puzzle;
 
@@ -41,7 +40,7 @@ public class PuzzleView : MonoBehaviour
             {
                 GameObject quadgo = new GameObject(string.Format("quad_{0}_{1}", i, j));
                 quadgo.transform.parent = transform;
-                quadgo.transform.localPosition = new Vector3(j * (QuadView.QuadSize + QuadGap) + QuadView.QuadSize / 2 - QuadGap - center.x, i * (QuadView.QuadSize + QuadGap) + QuadView.QuadSize / 2 - QuadGap - center.y, 0);
+                quadgo.transform.localPosition = new Vector3(j * (QuadView.QuadSize + QuadGap) + QuadView.QuadSize / 2 - center.x, i * (QuadView.QuadSize + QuadGap) + QuadView.QuadSize / 2 - center.y, 0);
                 _quadViews[i, j] = quadgo.AddComponent<QuadView>();
                 _quadViews[i, j].quad = _puzzle[i, j];
             }
@@ -51,38 +50,68 @@ public class PuzzleView : MonoBehaviour
     public void Roll(IOperation op, Action callBack)
     {
         float maxDelay = 0;
-        IQuad[] rowQuads = _puzzle.GetRowQuads(op.row);
-        foreach (IQuad quad in rowQuads)
+        IQuad[] rowQuads = puzzle.GetRowQuads(op.row);
+        for (int i = op.column - 1; i >= 0; i--)
         {
-            if (quad.column != op.column)
+            QuadView qv = _quadViews[rowQuads[i].row, rowQuads[i].column];
+            float delay = (Mathf.Abs(rowQuads[i].column - op.column) - 1) * RollDelay;
+            maxDelay = Mathf.Max(maxDelay, delay);
+            if (rowQuads[i].value == QuadValue.Block)
             {
-                QuadView qv = _quadViews[quad.row, quad.column];
-                int factor = quad.column < op.column ? 1 : -1;
-                float delay = (Mathf.Abs(quad.column - op.column) - 1) * RotateDelay;
-                PlayQuadTween(qv, qv.localEulerAngles + new Vector3(0, factor * 180, 0), RotateDuration, delay);
-                maxDelay = Mathf.Max(delay, maxDelay);
+                qv.BlockShake(new Vector3(0, QuadView.ShakeAngle, 0), delay);
+                break;
+            }
+            else
+            {
+                qv.QuadRoll(new Vector3(0, QuadView.RollAngle, 0), delay);
+            }
+        }
+        for (int i = op.column + 1, len = rowQuads.Length; i < len; i++)
+        {
+            QuadView qv = _quadViews[rowQuads[i].row, rowQuads[i].column];
+            float delay = (Mathf.Abs(rowQuads[i].column - op.column) - 1) * RollDelay;
+            maxDelay = Mathf.Max(maxDelay, delay);
+            if (rowQuads[i].value == QuadValue.Block)
+            {
+                qv.BlockShake(new Vector3(0, -QuadView.ShakeAngle, 0), delay);
+                break;
+            }
+            else
+            {
+                qv.QuadRoll(new Vector3(0, -QuadView.RollAngle, 0), delay);
             }
         }
         IQuad[] columnQuads = puzzle.GetColumnQuads(op.column);
-        foreach (IQuad quad in columnQuads)
+        for (int i = op.row - 1; i >= 0; i--)
         {
-            if (quad.row != op.row)
+            QuadView qv = _quadViews[columnQuads[i].row, columnQuads[i].column];
+            float delay = (Mathf.Abs(columnQuads[i].row - op.row) - 1) * RollDelay;
+            maxDelay = Mathf.Max(maxDelay, delay);
+            if (columnQuads[i].value == QuadValue.Block)
             {
-                QuadView qv = _quadViews[quad.row, quad.column];
-                int factor = quad.row > op.row ? 1 : -1;
-                float delay = (Mathf.Abs(quad.row - op.row) - 1) * RotateDelay;
-                PlayQuadTween(qv, qv.localEulerAngles + new Vector3(factor * 180, 0, 0), RotateDuration, delay);
-                maxDelay = Mathf.Max(delay, maxDelay);
+                qv.BlockShake(new Vector3(QuadView.ShakeAngle, 0, 0), delay);
+                break;
+            }
+            else
+            {
+                qv.QuadRoll(new Vector3(QuadView.RollAngle, 0, 0), delay);
             }
         }
-        DOTween.To(() => 0f, x => x = 0f, 0f, RotateDuration + maxDelay).OnComplete(() => callBack());
-    }
-
-    private Tweener PlayQuadTween(QuadView quadtr, Vector3 to, float duration, float delay)
-    {
-        Tweener t = DOTween.To(() => quadtr.localEulerAngles, x => quadtr.localEulerAngles = x, to, duration)
-            .SetDelay(delay)
-            .SetEase(Ease.OutBack);
-        return t;
+        for (int i = op.row + 1, len = columnQuads.Length; i < len; i++)
+        {
+            QuadView qv = _quadViews[columnQuads[i].row, columnQuads[i].column];
+            float delay = (Mathf.Abs(columnQuads[i].row - op.row) - 1) * RollDelay;
+            maxDelay = Mathf.Max(maxDelay, delay);
+            if (columnQuads[i].value == QuadValue.Block)
+            {
+                qv.BlockShake(new Vector3(-QuadView.ShakeAngle, 0, 0), delay);
+                break;
+            }
+            else
+            {
+                qv.QuadRoll(new Vector3(-QuadView.RollAngle, 0, 0), delay);
+            }
+        }
+        DOTween.To(() => 0f, x => x = 0f, 0f, QuadView.RollDuration + maxDelay).OnComplete(() => callBack());
     }
 }

@@ -6,12 +6,18 @@
 public interface ILevel : IEventDispatcher
 {
     /// <summary>
+    /// 根据参数生成谜题
+    /// </summary>
+    /// <param name="pp"></param>
+    void MakePuzzle(PuzzleParams pp);
+
+    /// <summary>
     /// 谜题
     /// </summary>
     IPuzzle puzzle { get; }
 
     /// <summary>
-    /// 操作记录和控制
+    /// 玩家操作记录
     /// </summary>
     IRecord record { get; }
 

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public static class LevelViewUtil
+public static class QuadViewUtil
 {
     private static Shader quadShader;
 
@@ -65,5 +65,29 @@ public static class LevelViewUtil
             5, 7, 4
         }, 1);
         return mesh;
+    }
+
+    public static Color GetColor(QuadValue value)
+    {
+        Color color = Color.white;
+        switch (value)
+        {
+            case QuadValue.Front:
+                {
+                    color = new Color(1, 0.5f, 0);
+                    break;
+                }
+            case QuadValue.Back:
+                {
+                    color = new Color(0, 0.5f, 1);
+                    break;
+                }
+            case QuadValue.Block:
+                {
+                    color = new Color(0.4f, 0.2f, 0);
+                    break;
+                }
+        }
+        return color;
     }
 }

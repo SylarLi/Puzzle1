@@ -6,7 +6,7 @@ public interface IQuad : IEventDispatcher, IStream
 
     int column { get; }
 
-    int value { get; set; }
+    QuadValue value { get; set; }
 
     IQuad Clone();
 }

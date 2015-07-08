@@ -5,13 +5,7 @@ public class Record : List<IOperation>, IRecord
 {
     public Record() : base()
     {
-        opValid = true;
-    }
 
-    public bool opValid
-    {
-        get;
-        set;
     }
 
     public void Push(params IOperation[] ops)

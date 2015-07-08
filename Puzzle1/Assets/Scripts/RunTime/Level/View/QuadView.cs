@@ -5,8 +5,12 @@ using DG.Tweening;
 public class QuadView : MonoBehaviour
 {
     public const float QuadSize = 1;
+    public const float RollAngle = 180f;
+    public const float RollDuration = 0.5f;
     public const float TouchScale = 0.7f;
     public const float TouchScaleDuration = 0.2f;
+    public const float ShakeAngle = 45f;
+    public const float ShakeDuration = 0.25f;
 
     private MeshFilter _meshFilter;
 
@@ -20,14 +24,18 @@ public class QuadView : MonoBehaviour
 
     private Vector3 _localEulerAngles;
 
+    private Tweener _rollTween;
+
     private Tweener _scaleTween;
+
+    private Sequence _shakeSeq;
 
     private void Awake()
     {
         _localEulerAngles = transform.localEulerAngles;
         _meshFilter = gameObject.AddComponent<MeshFilter>();
-        _meshFilter.mesh = LevelViewUtil.GetQuadMesh(QuadSize);
-        Shader shader = LevelViewUtil.GetQuadShader();
+        _meshFilter.mesh = QuadViewUtil.GetQuadMesh(QuadSize);
+        Shader shader = QuadViewUtil.GetQuadShader();
         _materials = new Material[2]
         {
             new Material(shader) { color = Color.white },
@@ -55,10 +63,30 @@ public class QuadView : MonoBehaviour
 
     private void UpdateQuadView()
     {
-        Color color1 = new Color(1, 0.5f, 0);
-        Color color2 = new Color(0, 0.5f, 1);
-        _materials[0].color = _quad.value == 1 ? color1 : color2;
-        _materials[1].color = _quad.value == 1 ? color2 : color1;
+        switch (_quad.value)
+        {
+            case QuadValue.Front:
+                {
+                    _materials[0].color = QuadViewUtil.GetColor(QuadValue.Front);
+                    _materials[1].color = QuadViewUtil.GetColor(QuadValue.Back);
+                    _boxCollider.enabled = true;
+                    break;
+                }
+            case QuadValue.Back:
+                {
+                    _materials[0].color = QuadViewUtil.GetColor(QuadValue.Back);
+                    _materials[1].color = QuadViewUtil.GetColor(QuadValue.Front);
+                    _boxCollider.enabled = true;
+                    break;
+                }
+            case QuadValue.Block:
+                {
+                    _materials[0].color = QuadViewUtil.GetColor(QuadValue.Block);
+                    _materials[1].color = QuadViewUtil.GetColor(QuadValue.Block);
+                    _boxCollider.enabled = false;
+                    break;
+                }
+        }
     }
 
     public Vector3 localEulerAngles
@@ -74,9 +102,26 @@ public class QuadView : MonoBehaviour
         }
     }
 
+    public void QuadRoll(Vector3 deltaEulerAngles, float delay)
+    {
+        KillQuadRoll();
+        _rollTween = DOTween.To(() => localEulerAngles, x => localEulerAngles = x, localEulerAngles + deltaEulerAngles, RollDuration)
+            .SetDelay(delay)
+            .SetEase(Ease.OutBack);
+    }
+
+    private void KillQuadRoll()
+    {
+        if (_rollTween != null)
+        {
+            _rollTween.Kill();
+            _rollTween = null;
+        }
+    }
+
     public void TouchStart()
     {
-        KillScaleTween();
+        KillTouchScale();
         _scaleTween = DOTween.To(() => transform.localScale, x => 
             {
                 transform.localScale = x;
@@ -89,7 +134,7 @@ public class QuadView : MonoBehaviour
 
     public void TouchEnd()
     {
-        KillScaleTween();
+        KillTouchScale();
         _scaleTween = DOTween.To(() => transform.localScale, x =>
             {
                 transform.localScale = x;
@@ -102,7 +147,7 @@ public class QuadView : MonoBehaviour
 
     public void TouchClick()
     {
-        KillScaleTween();
+        KillTouchScale();
         _scaleTween = DOTween.To(() => transform.localScale, x =>
             {
                 transform.localScale = x;
@@ -113,12 +158,31 @@ public class QuadView : MonoBehaviour
         ).SetEase(Ease.OutBack);
     }
 
-    private void KillScaleTween()
+    private void KillTouchScale()
     {
         if (_scaleTween != null)
         {
             _scaleTween.Kill();
             _scaleTween = null;
+        }
+    }
+
+    public void BlockShake(Vector3 deltaEulerAngles, float delay)
+    {
+        KillBlockShake();
+        _shakeSeq = DOTween.Sequence();
+        _shakeSeq.AppendInterval(delay)
+            .Append(DOTween.To(() => localEulerAngles, x => localEulerAngles = x, localEulerAngles + deltaEulerAngles, ShakeDuration * 0.25f))
+            .Append(DOTween.To(() => localEulerAngles, x => localEulerAngles = x, localEulerAngles - deltaEulerAngles, ShakeDuration * 0.25f))
+            .Append(DOTween.To(() => localEulerAngles, x => localEulerAngles = x, localEulerAngles, ShakeDuration * 0.5f).SetEase(Ease.OutBack));
+    }
+
+    private void KillBlockShake()
+    {
+        if (_shakeSeq != null)
+        {
+            _shakeSeq.Kill();
+            _shakeSeq = null;
         }
     }
 }

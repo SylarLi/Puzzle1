@@ -7,14 +7,14 @@ public class Quad : EventDispatcher, IQuad
 
     private int _column;
 
-    private int _value;
+    private QuadValue _value;
 
     public Quad() : base()
     {
 
     }
 
-    public Quad(int row, int column, int value = 0)
+    public Quad(int row, int column, QuadValue value = QuadValue.Block)
     {
         _row = row;
         _column = column;
@@ -37,7 +37,7 @@ public class Quad : EventDispatcher, IQuad
         }
     }
 
-    public int value
+    public QuadValue value
     {
         get
         {
@@ -62,13 +62,13 @@ public class Quad : EventDispatcher, IQuad
     {
         writer.Write(_row);
         writer.Write(_column);
-        writer.Write(_value);
+        writer.Write((int)_value);
     }
 
     public void ReadOut(BinaryReader reader)
     {
         _row = reader.ReadInt32();
         _column = reader.ReadInt32();
-        _value = reader.ReadInt32();
+        _value = (QuadValue)reader.ReadInt32();
     }
 }
