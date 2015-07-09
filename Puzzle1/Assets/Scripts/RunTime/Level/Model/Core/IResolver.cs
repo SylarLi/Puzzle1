@@ -1,9 +1,24 @@
 ﻿public interface IResolver
 {
-    void Apply(IPuzzle puzzle, IOperation op);
+    /// <summary>
+    /// 同时影响谜题数据和表现
+    /// </summary>
+    /// <param name="puzzle"></param>
+    /// <param name="op"></param>
+    void ResolveTouch(IPuzzle puzzle, IOperation op);
 
-    bool IsWin(IPuzzle puzzle);
+    /// <summary>
+    /// 只影响谜题数据
+    /// </summary>
+    /// <param name="puzzle"></param>
+    /// <param name="op"></param>
+    void ResolveData(IPuzzle puzzle, IOperation op);
 
-    bool IsLose(IPuzzle puzzle);
+    /// <summary>
+    /// Solved???
+    /// </summary>
+    /// <param name="puzzle"></param>
+    /// <returns></returns>
+    bool IsSolved(IPuzzle puzzle);
 }
 

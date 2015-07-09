@@ -17,6 +17,9 @@ public static class Style
 
     public const float PuzzleDepth = 20;
 
+    public const string QuadUnifiedRotateId = "Rotate";
+    public const string QuadUnifiedScaleId = "Scale";
+
     private static Shader quadShader;
 
     public static Shader GetQuadShader()
@@ -82,24 +85,24 @@ public static class Style
         return mesh;
     }
 
-    public static Color GetColor(QuadValue value)
+    public static Color GetColor(QuadValue value, float alpha = 1)
     {
         Color color = Color.white;
         switch (value)
         {
             case QuadValue.Front:
                 {
-                    color = new Color(1, 0.5f, 0);
+                    color = new Color(1, 0.5f, 0, alpha);
                     break;
                 }
             case QuadValue.Back:
                 {
-                    color = new Color(0, 0.5f, 1);
+                    color = new Color(0, 0.5f, 1, alpha);
                     break;
                 }
             case QuadValue.Block:
                 {
-                    color = new Color(0.4f, 0.2f, 0);
+                    color = new Color(0.4f, 0.2f, 0, alpha);
                     break;
                 }
         }

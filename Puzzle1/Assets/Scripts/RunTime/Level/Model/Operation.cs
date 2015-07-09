@@ -2,7 +2,7 @@
 
 public class Operation : IOperation
 {
-    private OperationType _type;
+    private OpType _type;
 
     private int _row;
 
@@ -13,7 +13,7 @@ public class Operation : IOperation
 
     }
 
-    public Operation(OperationType type, int row, int column)
+    public Operation(OpType type, int row, int column)
     {
         _type = type;
         _row = row;
@@ -29,12 +29,12 @@ public class Operation : IOperation
 
     public void ReadOut(BinaryReader reader)
     {
-        _type = (OperationType)reader.ReadInt32();
+        _type = (OpType)reader.ReadInt32();
         _row = reader.ReadInt32();
         _column = reader.ReadInt32();
     }
 
-    public OperationType type
+    public OpType type
     {
         get
         {

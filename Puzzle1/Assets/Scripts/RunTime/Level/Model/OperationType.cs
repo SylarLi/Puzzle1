@@ -1,4 +1,4 @@
-﻿public enum OperationType
+﻿public enum OpType
 {
     None,
     TouchStart,

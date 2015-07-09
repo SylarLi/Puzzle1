@@ -10,6 +10,8 @@ public class Puzzle : Vision, IPuzzle
 
     private IQuad[,] _values;
 
+    private bool _solved;
+
     public Puzzle() : base()
     {
         
@@ -121,6 +123,22 @@ public class Puzzle : Vision, IPuzzle
             }
         }
         return puzzle;
+    }
+
+    public bool solved
+    {
+        get
+        {
+            return _solved;
+        }
+        set
+        {
+            if (_solved != value)
+            {
+                _solved = value;
+                DispatchEvent(new PuzzleEvent(PuzzleEvent.SolveChange));
+            }
+        }
     }
 
     protected override void UpdateChildrenAlpha()

@@ -14,4 +14,6 @@ public interface IVision : IEventDispatcher
     Vector3 localEulerAngles { get; set; }
 
     Vector3 localScale { get; set; }
+
+    bool touchEnable { get; set; }
 }

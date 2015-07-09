@@ -7,6 +7,7 @@ using UnityEngine;
 public class LevelInput : MonoListener
 {
     private const float RayInterval = 0.1f;
+
     private float rayTick = 0;
 
     private Collider touchStart;
@@ -94,6 +95,10 @@ public class LevelInput : MonoListener
                 }
             }
         }
+        else if (Input.GetKey(KeyCode.R))
+        {
+            DispatchEvent(new LevelInputEvent(LevelInputEvent.Key, KeyCode.R));
+        }
 #endif
     }
 
@@ -102,7 +107,7 @@ public class LevelInput : MonoListener
         Collider collider = null;
         Ray ray = Camera.main.ScreenPointToRay(mousePosition);
         RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, PuzzleView.PuzzleDepth + 1))
+        if (Physics.Raycast(ray, out hit, Style.PuzzleDepth + 1))
         {
             collider = hit.collider;
         }

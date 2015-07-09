@@ -13,6 +13,8 @@ public abstract class Vision : EventDispatcher, IVision
 
     private Vector3 _localScale;
 
+    private bool _touchEnable;
+
     public Vision()
     {
         _parentAlpha = 1;
@@ -80,7 +82,6 @@ public abstract class Vision : EventDispatcher, IVision
             if (_localPosition != value)
             {
                 _localPosition = value;
-                UpdateLocalPosition();
                 DispatchEvent(new VisionEvent(VisionEvent.LocalPositionChange));
             }
         }
@@ -114,6 +115,22 @@ public abstract class Vision : EventDispatcher, IVision
             {
                 _localScale = value;
                 DispatchEvent(new VisionEvent(VisionEvent.LocalScaleChange));
+            }
+        }
+    }
+
+    public bool touchEnable
+    {
+        get
+        {
+            return _touchEnable;
+        }
+        set
+        {
+            if (_touchEnable != value)
+            {
+                _touchEnable = value;
+                DispatchEvent(new VisionEvent(VisionEvent.TouchEnableChange));
             }
         }
     }

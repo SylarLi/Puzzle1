@@ -16,29 +16,30 @@ public class Level : EventDispatcher, ILevel
 
     public void MakePuzzle(PuzzleParams pp)
     {
-        _puzzle = new Puzzle(pp.rows, pp.columns);
-        for (int i = 0; i < puzzle.rows; i++)
-        {
-            for (int j = 0; j < puzzle.columns; j++)
-            {
-                _puzzle[i, j] = new Quad(i, j, QuadValue.Front);
-            }
-        }
-        System.Random random = new System.Random();
-        for (int i = 0; i < pp.block; i++)
-        {
-            _puzzle[random.Next(_puzzle.rows), random.Next(_puzzle.columns)].value = QuadValue.Block;
-        }
         do
         {
+            _record.Clear();
+            _puzzle = new Puzzle(pp.rows, pp.columns);
+            for (int i = 0; i < puzzle.rows; i++)
+            {
+                for (int j = 0; j < puzzle.columns; j++)
+                {
+                    _puzzle[i, j] = new Quad(i, j, QuadValue.Front);
+                }
+            }
+            System.Random random = new System.Random();
+            for (int i = 0; i < pp.block; i++)
+            {
+                _puzzle[random.Next(_puzzle.rows), random.Next(_puzzle.columns)].value = QuadValue.Block;
+            }
             for (int i = 0; i < 10; i++)
             {
-                IOperation operation = new Operation(random.Next(_puzzle.rows), random.Next(_puzzle.columns));
-                _resolver.Apply(_puzzle, operation);
+                IOperation op = new Operation(OpType.TouchClick, random.Next(_puzzle.rows), random.Next(_puzzle.columns));
+                _record.Push(op);
+                _resolver.ResolveData(_puzzle, op);
             }
         }
-        while (_resolver.IsWin(_puzzle));
-        _record.Clear();
+        while (_resolver.IsSolved(_puzzle));
     }
 
     public IPuzzle puzzle

@@ -13,4 +13,6 @@ public interface IPuzzle : IVision, IStream
     IQuad[] GetColumnQuads(int column);
 
     IPuzzle Clone();
+
+    bool solved { get; set; }
 }

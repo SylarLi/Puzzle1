@@ -1,6 +1,6 @@
 ﻿public interface IOperation : IStream
 {
-    OperationType type { get; }
+    OpType type { get; }
 
     int row { get; }
 
