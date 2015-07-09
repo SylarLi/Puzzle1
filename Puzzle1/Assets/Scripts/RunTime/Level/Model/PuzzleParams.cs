@@ -16,7 +16,12 @@
     public int block = 0;
 
     /// <summary>
-    /// 根据难度生成谜题参数
+    /// 箭头数量
+    /// </summary>
+    public int arrow = 0;
+
+    /// <summary>
+    /// 根据难度随机生成谜题参数
     /// </summary>
     /// <param name="rank"></param>
     public static PuzzleParams GetPuzzleParamsByRank(int rank)
@@ -27,10 +32,22 @@
             pp.rows = pp.columns = rank + 2;
             pp.block = 0;
         }
+        else if (rank <= 10)
+        {
+            pp.rows = pp.columns = 7;
+            pp.block = rank - 5;
+        }
+        else if (rank <= 15)
+        {
+            pp.rows = pp.columns = 7;
+            pp.block = 0;
+            pp.arrow = rank - 10;
+        }
         else
         {
             pp.rows = pp.columns = 7;
-            pp.block = System.Math.Min(rank - 5, 4);
+            pp.block = new System.Random().Next(10);
+            pp.arrow = 10 - pp.block;
         }
         return pp;
     }

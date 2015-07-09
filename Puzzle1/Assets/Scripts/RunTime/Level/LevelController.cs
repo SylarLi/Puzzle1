@@ -4,7 +4,7 @@ using DG.Tweening;
 
 public class LevelController
 {
-    private int rank = 1;
+    private int rank = 11;
 
     private LevelInput levelInput;
 

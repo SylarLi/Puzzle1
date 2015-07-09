@@ -3,8 +3,9 @@
     Front = 0,
     Back = 1,
     Block = 2,
-    Left = 3,
-    Right = 4,
-    Up = 5,
-    Down = 6,
+
+    Left = 1 << 20,
+    Right = 1 << 21,
+    Up = 1 << 22,
+    Down = 1 << 23,
 }

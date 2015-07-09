@@ -8,16 +8,19 @@ public class Operation : IOperation
 
     private int _column;
 
+    private QuadValue _direction;
+
     public Operation() : base()
     {
 
     }
 
-    public Operation(OpType type, int row, int column)
+    public Operation(OpType type, int row, int column, QuadValue direction = QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)
     {
         _type = type;
         _row = row;
         _column = column;
+        _direction = direction;
     }
 
     public void WriteIn(BinaryWriter writer)
@@ -55,6 +58,14 @@ public class Operation : IOperation
         get
         {
             return _column;
+        }
+    }
+
+    public QuadValue direction
+    {
+        get
+        {
+            return _direction;
         }
     }
 }

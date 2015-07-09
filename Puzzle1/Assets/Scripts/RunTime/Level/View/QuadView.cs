@@ -65,7 +65,6 @@ public class QuadView : VisisonView<IQuad>
                 {
                     _materials[0].color = Style.GetColor(QuadValue.Front, data.alpha);
                     _materials[1].color = Style.GetColor(QuadValue.Back, data.alpha);
-                    _boxCollider.enabled = true;
                     data.localEulerAngles = Vector3.zero;
                     break;
                 }
@@ -73,7 +72,6 @@ public class QuadView : VisisonView<IQuad>
                 {
                     _materials[0].color = Style.GetColor(QuadValue.Back, data.alpha);
                     _materials[1].color = Style.GetColor(QuadValue.Front, data.alpha);
-                    _boxCollider.enabled = true;
                     data.localEulerAngles = Vector3.zero;
                     break;
                 }
@@ -81,9 +79,18 @@ public class QuadView : VisisonView<IQuad>
                 {
                     _materials[0].color = Style.GetColor(QuadValue.Block, data.alpha);
                     _materials[1].color = Style.GetColor(QuadValue.Block, data.alpha);
-                    _boxCollider.enabled = false;
                     data.localEulerAngles = Vector3.zero;
                     data.localAlpha = 0;
+                    break;
+                }
+            default:
+                {
+                    if ((data.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
+                    {
+                        _materials[0].color = Color.red;
+                        _materials[1].color = Color.red;
+                        data.localEulerAngles = Vector3.zero;
+                    }
                     break;
                 }
         }

@@ -12,7 +12,7 @@
     /// </summary>
     /// <param name="puzzle"></param>
     /// <param name="op"></param>
-    void ResolveData(IPuzzle puzzle, IOperation op);
+    void ResolveTouchData(IPuzzle puzzle, IOperation op);
 
     /// <summary>
     /// Solved???
