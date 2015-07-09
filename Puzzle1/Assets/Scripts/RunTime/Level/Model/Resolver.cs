@@ -1,17 +1,54 @@
-﻿public class Resolver : IResolver
+﻿using DG.Tweening;
+using UnityEngine;
+
+public class Resolver : IResolver
 {
     public void Apply(IPuzzle puzzle, IOperation op)
     {
+        switch (op.type)
+        {
+            case OperationType.TouchClick:
+                {
+                    ApplyTouchClick(puzzle, op);
+                    break;
+                }
+            case OperationType.TouchStart:
+                {
+                    ApplyTouchStart(puzzle, op);
+                    break;
+                }
+            case OperationType.TouchEnd:
+                {
+                    ApplyTouchEnd(puzzle, op);
+                    break;
+                }
+        }
+    }
+
+    private void ApplyTouchClick(IPuzzle puzzle, IOperation op)
+    {
+        float maxDelay = 0f;
         IQuad[] rowQuads = puzzle.GetRowQuads(op.row);
         for (int i = op.column - 1; i >= 0; i--)
         {
-            if (rowQuads[i].value == QuadValue.Block)
+            IQuad quad = rowQuads[i];
+            float delay = (Mathf.Abs(quad.column - op.column) - 1) * Style.QuadRollDelay;
+            maxDelay = Mathf.Max(maxDelay, delay);
+            if (quad.value == QuadValue.Block)
             {
+                Sequence shakeSeq = DOTween.Sequence();
+                shakeSeq.AppendInterval(delay)
+                    .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(0, Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
+                    .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles - new Vector3(0, Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
+                    .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles, Style.QuadShakeDuration * 0.5f).SetEase(Ease.OutBack));
                 break;
             }
             else
             {
-                rowQuads[i].value = (QuadValue)(QuadValue.Back - rowQuads[i].value);
+                DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(0, Style.QuadRollAngle, 0), Style.QuadRollDuration)
+                    .SetDelay(delay)
+                    .SetEase(Ease.OutBack)
+                    .OnComplete(() => quad.value = (QuadValue)(QuadValue.Back - quad.value));
             }
         }
         for (int i = op.column + 1, len = rowQuads.Length; i < len; i++)
@@ -50,9 +87,14 @@
         }
     }
 
-    public void Reverse(IPuzzle puzzle, IOperation op)
+    private void ApplyTouchStart(IPuzzle puzzle, IOperation op)
     {
-        Apply(puzzle, op);
+
+    }
+
+    private void ApplyTouchEnd(IPuzzle puzzle, IOperation op)
+    {
+
     }
 
     public bool IsWin(IPuzzle puzzle)

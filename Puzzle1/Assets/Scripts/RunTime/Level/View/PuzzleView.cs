@@ -26,11 +26,11 @@ public class PuzzleView : MonoBehaviour
         set
         {
             _puzzle = value;
-            UpdatePuzzleView();
+            InitPuzzleView();
         }
     }
 
-    private void UpdatePuzzleView()
+    private void InitPuzzleView()
     {
         _quadViews = new QuadView[_puzzle.rows, _puzzle.columns];
         Vector3 center = new Vector3((_puzzle.columns * (QuadView.QuadSize + QuadGap) - QuadGap) / 2, (_puzzle.rows * (QuadView.QuadSize + QuadGap) - QuadGap) / 2);
@@ -38,11 +38,14 @@ public class PuzzleView : MonoBehaviour
         {
             for (int j = 0; j < _puzzle.columns; j++)
             {
-                GameObject quadgo = new GameObject(string.Format("quad_{0}_{1}", i, j));
-                quadgo.transform.parent = transform;
-                quadgo.transform.localPosition = new Vector3(j * (QuadView.QuadSize + QuadGap) + QuadView.QuadSize / 2 - center.x, i * (QuadView.QuadSize + QuadGap) + QuadView.QuadSize / 2 - center.y, 0);
-                _quadViews[i, j] = quadgo.AddComponent<QuadView>();
-                _quadViews[i, j].quad = _puzzle[i, j];
+                if (_puzzle[i, j].value != QuadValue.Block)
+                {
+                    GameObject quadgo = new GameObject(string.Format("quad_{0}_{1}", i, j));
+                    quadgo.transform.parent = transform;
+                    quadgo.transform.localPosition = new Vector3(j * (QuadView.QuadSize + QuadGap) + QuadView.QuadSize / 2 - center.x, i * (QuadView.QuadSize + QuadGap) + QuadView.QuadSize / 2 - center.y, 0);
+                    _quadViews[i, j] = quadgo.AddComponent<QuadView>();
+                    _quadViews[i, j].quad = _puzzle[i, j];
+                }
             }
         }
     }

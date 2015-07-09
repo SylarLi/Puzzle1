@@ -1,7 +1,7 @@
 ﻿using Core;
 using System.IO;
 
-public class Quad : EventDispatcher, IQuad
+public class Quad : Vision, IQuad
 {
     private int _row;
 
@@ -19,6 +19,20 @@ public class Quad : EventDispatcher, IQuad
         _row = row;
         _column = column;
         _value = value;
+    }
+
+    public void WriteIn(BinaryWriter writer)
+    {
+        writer.Write(_row);
+        writer.Write(_column);
+        writer.Write((int)_value);
+    }
+
+    public void ReadOut(BinaryReader reader)
+    {
+        _row = reader.ReadInt32();
+        _column = reader.ReadInt32();
+        _value = (QuadValue)reader.ReadInt32();
     }
 
     public int row
@@ -56,19 +70,5 @@ public class Quad : EventDispatcher, IQuad
     public IQuad Clone()
     {
         return new Quad(row, column, value);
-    }
-
-    public void WriteIn(BinaryWriter writer)
-    {
-        writer.Write(_row);
-        writer.Write(_column);
-        writer.Write((int)_value);
-    }
-
-    public void ReadOut(BinaryReader reader)
-    {
-        _row = reader.ReadInt32();
-        _column = reader.ReadInt32();
-        _value = (QuadValue)reader.ReadInt32();
     }
 }

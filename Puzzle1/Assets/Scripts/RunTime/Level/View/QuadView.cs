@@ -57,11 +57,56 @@ public class QuadView : MonoBehaviour
         set
         {
             _quad = value;
-            UpdateQuadView();
+            Trigger();
+            Listen();
         }
     }
 
-    private void UpdateQuadView()
+    private void Listen()
+    {
+        _quad.AddEventListener(VisionEvent.AlphaChange, AlphaChangeHandler);
+        _quad.AddEventListener(VisionEvent.LocalPositionChange, LocalPositionChangeHandler);
+        _quad.AddEventListener(VisionEvent.LocalEulerAnglesChange, LocalEulerAnglesChangeHandler);
+        _quad.AddEventListener(VisionEvent.LocalScaleChange, LocalScaleChangeHandler);
+        _quad.AddEventListener(QuadEvent.QuadValueChange, QuadValueChangeHandler);
+    }
+
+    private void Trigger()
+    {
+        AlphaChangeHandler(null);
+        LocalPositionChangeHandler(null);
+        LocalEulerAnglesChangeHandler(null);
+        LocalScaleChangeHandler(null);
+        QuadValueChangeHandler(null);
+
+    }
+
+    private void AlphaChangeHandler(IEvent e)
+    {
+        for (int i = _materials.Length - 1; i >= 0; i--)
+        {
+            Color color = _materials[i].color;
+            color.a = _quad.alpha;
+            _materials[i].color = color;
+        }
+    }
+
+    private void LocalPositionChangeHandler(IEvent e)
+    {
+        transform.localPosition = _quad.localPosition;
+    }
+
+    private void LocalEulerAnglesChangeHandler(IEvent e)
+    {
+        transform.localEulerAngles = _quad.localEulerAngles;
+    }
+
+    private void LocalScaleChangeHandler(IEvent e)
+    {
+        transform.localScale = _quad.localScale;
+    }
+
+    private void QuadValueChangeHandler(IEvent e)
     {
         switch (_quad.value)
         {
@@ -70,13 +115,15 @@ public class QuadView : MonoBehaviour
                     _materials[0].color = QuadViewUtil.GetColor(QuadValue.Front);
                     _materials[1].color = QuadViewUtil.GetColor(QuadValue.Back);
                     _boxCollider.enabled = true;
+                    _quad.localEulerAngles = Vector3.zero;
                     break;
                 }
             case QuadValue.Back:
                 {
-                    _materials[0].color = QuadViewUtil.GetColor(QuadValue.Back);
-                    _materials[1].color = QuadViewUtil.GetColor(QuadValue.Front);
+                    _materials[0].color = QuadViewUtil.GetColor(QuadValue.Front);
+                    _materials[1].color = QuadViewUtil.GetColor(QuadValue.Back);
                     _boxCollider.enabled = true;
+                    _quad.localEulerAngles = new Vector3(180, 0, 0);
                     break;
                 }
             case QuadValue.Block:
@@ -86,19 +133,6 @@ public class QuadView : MonoBehaviour
                     _boxCollider.enabled = false;
                     break;
                 }
-        }
-    }
-
-    public Vector3 localEulerAngles
-    {
-        get
-        {
-            return _localEulerAngles;
-        }
-        set
-        {
-            _localEulerAngles = value;
-            transform.localEulerAngles = _localEulerAngles;
         }
     }
 

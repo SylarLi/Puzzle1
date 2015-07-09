@@ -1,7 +1,22 @@
 ﻿using UnityEngine;
 
-public static class QuadViewUtil
+public static class Style
 {
+    public const float QuadSize = 1;
+    public const float QuadGap = 0.1f;
+
+    public const float QuadRollAngle = 180f;
+    public const float QuadRollDuration = 0.5f;
+    public const float QuadRollDelay = 0.05f;
+
+    public const float QuadTouchScale = 0.7f;
+    public const float QuadTouchScaleDuration = 0.2f;
+
+    public const float QuadShakeAngle = 45f;
+    public const float QuadShakeDuration = 0.25f;
+
+    public const float PuzzleDepth = 20;
+
     private static Shader quadShader;
 
     public static Shader GetQuadShader()

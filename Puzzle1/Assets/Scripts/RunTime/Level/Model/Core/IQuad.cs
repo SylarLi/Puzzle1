@@ -1,6 +1,6 @@
 ﻿using Core;
 
-public interface IQuad : IEventDispatcher, IStream
+public interface IQuad : IVision, IStream
 {
     int row { get; }
 

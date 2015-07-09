@@ -2,7 +2,7 @@
  {
 	Properties 
 	{
-		_Color ("Color", Color) = (1, 1, 1)
+		_Color ("Color", Color) = (1, 1, 1, 1)
 	}
 	SubShader 
 	{
@@ -14,7 +14,7 @@
 			#pragma fragment frag
 			#include "UnityCG.cginc"
 
-			float3 _Color;
+			float4 _Color;
 
 			struct appdata
 			{
@@ -24,7 +24,7 @@
 			struct v2f 
 			{
 				float4 vertex : POSITION;
-				float3 color : COLOR;
+				float4 color : COLOR;
 			};
 
 			v2f vert(appdata v)
@@ -35,7 +35,7 @@
 				return o;
 			}
 
-			float3 frag(v2f i) : Color
+			float4 frag(v2f i) : Color
 			{
 				return i.color;
 			}

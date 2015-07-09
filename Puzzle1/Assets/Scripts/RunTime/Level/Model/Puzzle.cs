@@ -2,7 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 
-public class Puzzle : EventDispatcher, IPuzzle
+public class Puzzle : Vision, IPuzzle
 {
     private int _rows;
 
@@ -20,6 +20,34 @@ public class Puzzle : EventDispatcher, IPuzzle
         _rows = rows;
         _columns = columns;
         _values = new IQuad[_rows, _columns];
+    }
+
+    public void WriteIn(BinaryWriter writer)
+    {
+        writer.Write(_rows);
+        writer.Write(_columns);
+        for (int i = 0; i < _rows; i++)
+        {
+            for (int j = 0; j < _columns; j++)
+            {
+                this[i, j].WriteIn(writer);
+            }
+        }
+    }
+
+    public void ReadOut(BinaryReader reader)
+    {
+        _rows = reader.ReadInt32();
+        _columns = reader.ReadInt32();
+        _values = new Quad[_rows, _columns];
+        for (int i = 0; i < _rows; i++)
+        {
+            for (int j = 0; j < _columns; j++)
+            {
+                this[i, j] = new Quad();
+                this[i, j].ReadOut(reader);
+            }
+        }
     }
 
     public int rows
@@ -46,6 +74,10 @@ public class Puzzle : EventDispatcher, IPuzzle
         }
         set
         {
+            if (value == null)
+            {
+                throw new System.InvalidOperationException("Puzzle's quad can not be null.");
+            }
             if (_values[row, column] == null)
             {
                 _values[row, column] = value;
@@ -54,6 +86,7 @@ public class Puzzle : EventDispatcher, IPuzzle
             {
                 _values[row, column].value = value.value;
             }
+            UpdateChildAlpha(row, column);
         }
     }
 
@@ -90,31 +123,19 @@ public class Puzzle : EventDispatcher, IPuzzle
         return puzzle;
     }
 
-    public void WriteIn(BinaryWriter writer)
+    protected override void UpdateChildrenAlpha()
     {
-        writer.Write(_rows);
-        writer.Write(_columns);
         for (int i = 0; i < _rows; i++)
         {
             for (int j = 0; j < _columns; j++)
             {
-                this[i, j].WriteIn(writer);
+                UpdateChildAlpha(i, j);
             }
-        }
+        } 
     }
 
-    public void ReadOut(BinaryReader reader)
+    private void UpdateChildAlpha(int row, int column)
     {
-        _rows = reader.ReadInt32();
-        _columns = reader.ReadInt32();
-        _values = new Quad[_rows, _columns];
-        for (int i = 0; i < _rows; i++)
-        {
-            for (int j = 0; j < _columns; j++)
-            {
-                this[i, j] = new Quad();
-                this[i, j].ReadOut(reader);
-            }
-        }
+        this[row, column].parentAlpha = alpha;
     }
 }

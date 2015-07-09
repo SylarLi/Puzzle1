@@ -1,6 +1,6 @@
 ﻿using Core;
 
-public interface IPuzzle : IEventDispatcher, IStream
+public interface IPuzzle : IVision, IStream
 {
     int rows { get; }
 
