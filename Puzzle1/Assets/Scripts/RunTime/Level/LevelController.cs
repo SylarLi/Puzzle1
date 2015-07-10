@@ -130,7 +130,7 @@ public class LevelController
                         IOperation op = level.record.Pop();
                         if (op != null)
                         {
-                            DOTween.timeScale = 4;
+                            //DOTween.timeScale = 4;
                             level.resolver.ResolveTouch(level.puzzle, op);
                         }
                     }

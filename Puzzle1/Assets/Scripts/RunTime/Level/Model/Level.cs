@@ -38,7 +38,8 @@ public class Level : EventDispatcher, ILevel
             i--;
         }
 
-        QuadValue[] diretions = new QuadValue[] { QuadValue.Left, QuadValue.Right, QuadValue.Up, QuadValue.Down, QuadValue.Left | QuadValue.Up, QuadValue.Right | QuadValue.Up, QuadValue.Left | QuadValue.Down, QuadValue.Right | QuadValue.Down };
+        // QuadValue.Left | QuadValue.Up, QuadValue.Right | QuadValue.Up, QuadValue.Left | QuadValue.Down, QuadValue.Right | QuadValue.Down
+        QuadValue[] diretions = new QuadValue[] { QuadValue.Left, QuadValue.Right, QuadValue.Up, QuadValue.Down };
         do
         {
             i = pp.arrow;

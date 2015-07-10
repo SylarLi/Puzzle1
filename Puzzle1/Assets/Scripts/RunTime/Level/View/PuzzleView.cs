@@ -6,15 +6,10 @@ public class PuzzleView : VisisonView<IPuzzle>
 {
     private QuadView[,] _quadViews;
 
-    private void Awake()
-    {
-
-    }
-
     protected override void Trigger()
     {
-        base.Trigger();
         InitPuzzleView();
+        base.Trigger();
     }
 
     private void InitPuzzleView()

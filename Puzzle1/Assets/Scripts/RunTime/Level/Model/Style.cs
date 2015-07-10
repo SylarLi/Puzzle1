@@ -18,6 +18,10 @@ public static class Style
     public const float QuadConflictAngle = 90f;
     public const float QuadConflictDuration = 0.25f;
 
+    public const float QuadSprinkleScale = 2.5f;
+    public const float QuadSprinkleDepthAddition = -5f;
+    public const float QuadSprinkleDuration = 0.7f;
+
     public const float PuzzleDepth = 20;
 
     public const string QuadUnifiedRotateId = "Rotate";
@@ -25,9 +29,7 @@ public static class Style
 
     private static Shader quadShader;
 
-    private static Mesh quadMesh;
-
-    private static Mesh arrowMesh;
+    private static Material quadMaterial;
 
     public static Shader GetQuadShader()
     {
@@ -38,123 +40,108 @@ public static class Style
         return quadShader;
     }
 
+    public static Material GetQuadMaterial()
+    {
+        if (quadMaterial == null)
+        {
+            quadMaterial = new Material(GetQuadShader());
+        }
+        return quadMaterial;
+    }
+
     public static Mesh GetQuadMesh()
     {
-        if (quadMesh == null)
+        float size = QuadSize;
+        float halfSize = size * 0.5f;
+        Mesh quadMesh = new Mesh();
+        quadMesh.name = "QuadMesh";
+        quadMesh.MarkDynamic();
+        Vector3[] vertices = new Vector3[]
         {
-            float size = QuadSize;
-            float halfSize = size / 2f;
-            quadMesh = new Mesh();
-            quadMesh.vertices = new Vector3[]
-            {
-                new Vector3(-halfSize, halfSize, 0),
-                new Vector3(halfSize, -halfSize, 0),
-                new Vector3(-halfSize, -halfSize, 0),
-                new Vector3(halfSize, halfSize, 0),
+            new Vector3(-halfSize, halfSize, 0),
+            new Vector3(halfSize, -halfSize, 0),
+            new Vector3(-halfSize, -halfSize, 0),
+            new Vector3(halfSize, halfSize, 0),
 
-                new Vector3(-halfSize, halfSize, 0),
-                new Vector3(halfSize, -halfSize, 0),
-                new Vector3(-halfSize, -halfSize, 0),
-                new Vector3(halfSize, halfSize, 0),
-            };
-            quadMesh.normals = new Vector3[]
-            {
-                -Vector3.forward,
-                -Vector3.forward,
-                -Vector3.forward,
-                -Vector3.forward,
-
-                Vector3.forward,
-                Vector3.forward,
-                Vector3.forward,
-                Vector3.forward,
-            };
-            quadMesh.colors = new Color[]
-            {
-                Color.white,
-                Color.white,
-                Color.white,
-                Color.white,
-
-                Color.white,
-                Color.white,
-                Color.white,
-                Color.white,
-            };
-            quadMesh.subMeshCount = 2;
-            quadMesh.SetTriangles(new int[]
-            {
-                0, 1, 2,
-                0, 3, 1,
-            }, 0);
-            quadMesh.SetTriangles(new int[]
-            {
-                6, 5, 4,
-                5, 7, 4
-            }, 1);
+            new Vector3(-halfSize, halfSize, 0),
+            new Vector3(halfSize, -halfSize, 0),
+            new Vector3(-halfSize, -halfSize, 0),
+            new Vector3(halfSize, halfSize, 0),
+        };
+        Vector2[] uv = new Vector2[vertices.Length];
+        Vector3[] normals = new Vector3[vertices.Length];
+        Color32[] colors32 = new Color32[vertices.Length];
+        for (int i = vertices.Length - 1; i >= 0; i--)
+        {
+            uv[i] = i < 4 ? new Vector2(vertices[i].x / size + 0.5f, 0.5f - vertices[i].y / size) : new Vector2(0.5f - vertices[i].x / size, 0.5f - vertices[i].y / size);
+            normals[i] = i < 4 ? -Vector3.forward : Vector3.forward;
+            colors32[i] = Color.white;
         }
+        quadMesh.vertices = vertices;
+        quadMesh.uv = uv;
+        quadMesh.normals = normals;
+        quadMesh.colors32 = colors32;
+        quadMesh.subMeshCount = 2;
+        quadMesh.SetTriangles(new int[]
+        {
+            0, 1, 2,
+            0, 3, 1,
+        }, 0);
+        quadMesh.SetTriangles(new int[]
+        {
+            6, 5, 4,
+            5, 7, 4
+        }, 1);
         return quadMesh;
     }
 
     public static Mesh GetArrowMesh()
     {
-        if (arrowMesh == null)
+        float size = QuadSize;
+        float up_y = size * 0.4f;
+        float down_y = -size * 0.3f;
+        float left_x = -size * 0.3f;
+        float right_x = size * 0.3f;
+        float center_y = -size * 0.1f;
+        Mesh arrowMesh = new Mesh();
+        arrowMesh.name = "ArrowMesh";
+        arrowMesh.MarkDynamic();
+        Vector3[] vertices = new Vector3[]
         {
-            float size = QuadSize;
-            float up_y = size * 0.4f;
-            float down_y = -size * 0.3f;
-            float left_x = -size * 0.3f;
-            float right_x = size * 0.3f;
-            float center_y = -size * 0.1f;
-            arrowMesh = new Mesh();
-            arrowMesh.vertices = new Vector3[]
-            {
-                new Vector3(0, up_y, 0),
-                new Vector3(0, center_y, 0),
-                new Vector3(left_x, down_y, 0),
-                new Vector3(right_x, down_y, 0),
+            new Vector3(0, up_y, 0),
+            new Vector3(0, center_y, 0),
+            new Vector3(left_x, down_y, 0),
+            new Vector3(right_x, down_y, 0),
 
-                new Vector3(0, up_y, 0),
-                new Vector3(0, 0, 0),
-                new Vector3(left_x, down_y, 0),
-                new Vector3(right_x, down_y, 0),
-            };
-            arrowMesh.normals = new Vector3[]
-            {
-                -Vector3.forward,
-                -Vector3.forward,
-                -Vector3.forward,
-                -Vector3.forward,
-
-                Vector3.forward,
-                Vector3.forward,
-                Vector3.forward,
-                Vector3.forward,
-            };
-            arrowMesh.colors = new Color[]
-            {
-                Color.white,
-                Color.white,
-                Color.white,
-                Color.white,
-
-                Color.white,
-                Color.white,
-                Color.white,
-                Color.white,
-            };
-            arrowMesh.subMeshCount = 2;
-            arrowMesh.SetTriangles(new int[]
-            {
-                0, 1, 2,
-                0, 3, 1,
-            }, 0);
-            arrowMesh.SetTriangles(new int[]
-            {
-                6, 5, 4,
-                5, 7, 4
-            }, 1);
+            new Vector3(0, up_y, 0),
+            new Vector3(0, 0, 0),
+            new Vector3(left_x, down_y, 0),
+            new Vector3(right_x, down_y, 0),
+        };
+        Vector2[] uv = new Vector2[vertices.Length];
+        Vector3[] normals = new Vector3[vertices.Length];
+        Color32[] colors32 = new Color32[vertices.Length];
+        for (int i = vertices.Length - 1; i >= 0; i--)
+        {
+            uv[i] = i < 4 ? new Vector2(vertices[i].x / size + 0.5f, 0.5f - vertices[i].y / size) : new Vector2(0.5f - vertices[i].x / size, 0.5f - vertices[i].y / size);
+            normals[i] = i < 4 ? -Vector3.forward : Vector3.forward;
+            colors32[i] = Color.white;
         }
+        arrowMesh.vertices = vertices;
+        arrowMesh.uv = uv;
+        arrowMesh.normals = normals;
+        arrowMesh.colors32 = colors32;
+        arrowMesh.subMeshCount = 2;
+        arrowMesh.SetTriangles(new int[]
+        {
+            0, 1, 2,
+            0, 3, 1,
+        }, 0);
+        arrowMesh.SetTriangles(new int[]
+        {
+            6, 5, 4,
+            5, 7, 4
+        }, 1);
         return arrowMesh;
     }
 

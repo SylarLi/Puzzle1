@@ -134,4 +134,9 @@ public abstract class Vision : EventDispatcher, IVision
             }
         }
     }
+
+    public void Spark(VisionSpark spark)
+    {
+        DispatchEvent(new VisionEvent(VisionEvent.DoSpark, spark));
+    }
 }

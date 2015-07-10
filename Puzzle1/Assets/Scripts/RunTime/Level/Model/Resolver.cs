@@ -38,7 +38,7 @@ public class Resolver : IResolver
             {
                 playings.ForEach((Tween each) =>
                 {
-                    if (each.id.ToString().StartsWith(Style.QuadUnifiedRotateId))
+                    if (each.id != null && each.id.ToString().StartsWith(Style.QuadUnifiedRotateId))
                     {
                         each.Kill(true);
                     }
@@ -84,6 +84,9 @@ public class Resolver : IResolver
                 }
                 else if ((quad.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
                 {
+                    VisionSpark spark = new VisionSpark(VisionSparkType.Sprinkle);
+                    spark.delay = delay + qdelay;
+                    quad.Spark(spark);
                     ResolvePresent(depot, puzzle, origin, new Operation(OpType.TouchClick, quad.row, quad.column, quad.value), delay + qdelay + Style.QuadRollDuration);
                     break;
                 }
@@ -128,6 +131,9 @@ public class Resolver : IResolver
                 }
                 else if ((quad.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
                 {
+                    VisionSpark spark = new VisionSpark(VisionSparkType.Sprinkle);
+                    spark.delay = delay + qdelay;
+                    quad.Spark(spark);
                     ResolvePresent(depot, puzzle, origin, new Operation(OpType.TouchClick, quad.row, quad.column, quad.value), delay + qdelay + Style.QuadRollDuration);
                     break;
                 }
@@ -173,6 +179,9 @@ public class Resolver : IResolver
                 }
                 else if ((quad.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
                 {
+                    VisionSpark spark = new VisionSpark(VisionSparkType.Sprinkle);
+                    spark.delay = delay + qdelay;
+                    quad.Spark(spark);
                     ResolvePresent(depot, puzzle, origin, new Operation(OpType.TouchClick, quad.row, quad.column, quad.value), delay + qdelay + Style.QuadRollDuration);
                     break;
                 }
@@ -217,6 +226,9 @@ public class Resolver : IResolver
                 }
                 else if ((quad.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
                 {
+                    VisionSpark spark = new VisionSpark(VisionSparkType.Sprinkle);
+                    spark.delay = delay + qdelay;
+                    quad.Spark(spark);
                     ResolvePresent(depot, puzzle, origin, new Operation(OpType.TouchClick, quad.row, quad.column, quad.value), delay + qdelay + Style.QuadRollDuration);
                     break;
                 }

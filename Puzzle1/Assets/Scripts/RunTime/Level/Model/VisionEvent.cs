@@ -8,7 +8,9 @@ public class VisionEvent : Event
     public const string LocalScaleChange = "LocalScaleChange";
     public const string TouchEnableChange = "TouchEnableChange";
 
-    public VisionEvent(string type, object data = null) : base(type, data = null)
+    public const string DoSpark = "DoSpark";
+
+    public VisionEvent(string type, object data = null) : base(type, data)
     {
 
     }
