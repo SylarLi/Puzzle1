@@ -15,6 +15,14 @@
     void ResolveTouchData(IPuzzle puzzle, IOperation op);
 
     /// <summary>
+    /// 是否死循环
+    /// </summary>
+    /// <param name="puzzle"></param>
+    /// <param name="op"></param>
+    /// <returns></returns>
+    bool ResolveIsLoop(IPuzzle puzzle);
+
+    /// <summary>
     /// Solved???
     /// </summary>
     /// <param name="puzzle"></param>

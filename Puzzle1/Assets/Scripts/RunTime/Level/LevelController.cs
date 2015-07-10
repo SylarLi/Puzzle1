@@ -4,7 +4,7 @@ using DG.Tweening;
 
 public class LevelController
 {
-    private int rank = 11;
+    private int rank = 21;
 
     private LevelInput levelInput;
 
@@ -69,6 +69,16 @@ public class LevelController
     {
         level = new Level();
         level.MakePuzzle(PuzzleParams.GetPuzzleParamsByRank(rank++));
+        //level.MakePuzzle(new QuadValue[,]
+        //{
+        //    { QuadValue.Back, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front },
+        //    { QuadValue.Back, QuadValue.Right | QuadValue.Down, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Down, QuadValue.Front },
+        //    { QuadValue.Back, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front },
+        //    { QuadValue.Back, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front },
+        //    { QuadValue.Back, QuadValue.Right, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front },
+        //    { QuadValue.Back, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front },
+        //    { QuadValue.Back, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front, QuadValue.Front },
+        //});
         level.puzzle.localPosition = new Vector3(0, 0, Style.PuzzleDepth);
         level.puzzle.AddEventListener(PuzzleEvent.SolveChange, SolveChangeHandler);
 
@@ -117,7 +127,12 @@ public class LevelController
                 {
                     if (level.puzzle.touchEnable)
                     {
-                        level.resolver.ResolveTouch(level.puzzle, level.record.Pop());
+                        IOperation op = level.record.Pop();
+                        if (op != null)
+                        {
+                            DOTween.timeScale = 4;
+                            level.resolver.ResolveTouch(level.puzzle, op);
+                        }
                     }
                     break;
                 }

@@ -12,6 +12,12 @@ public interface ILevel : IEventDispatcher
     void MakePuzzle(PuzzleParams pp);
 
     /// <summary>
+    /// 根据参数生成谜题
+    /// </summary>
+    /// <param name="values"></param>
+    void MakePuzzle(QuadValue[,] values);
+
+    /// <summary>
     /// 谜题
     /// </summary>
     IPuzzle puzzle { get; }

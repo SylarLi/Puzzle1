@@ -14,7 +14,6 @@ public class QuadView : VisisonView<IQuad>
     private void Awake()
     {
         _meshFilter = gameObject.AddComponent<MeshFilter>();
-        _meshFilter.mesh = Style.GetQuadMesh(Style.QuadSize);
         Shader shader = Style.GetQuadShader();
         _materials = new Material[2]
         {
@@ -63,23 +62,22 @@ public class QuadView : VisisonView<IQuad>
         {
             case QuadValue.Front:
                 {
+                    _meshFilter.mesh = Style.GetQuadMesh();
                     _materials[0].color = Style.GetColor(QuadValue.Front, data.alpha);
                     _materials[1].color = Style.GetColor(QuadValue.Back, data.alpha);
-                    data.localEulerAngles = Vector3.zero;
                     break;
                 }
             case QuadValue.Back:
                 {
+                    _meshFilter.mesh = Style.GetQuadMesh();
                     _materials[0].color = Style.GetColor(QuadValue.Back, data.alpha);
                     _materials[1].color = Style.GetColor(QuadValue.Front, data.alpha);
-                    data.localEulerAngles = Vector3.zero;
                     break;
                 }
             case QuadValue.Block:
                 {
-                    _materials[0].color = Style.GetColor(QuadValue.Block, data.alpha);
-                    _materials[1].color = Style.GetColor(QuadValue.Block, data.alpha);
-                    data.localEulerAngles = Vector3.zero;
+                    _meshFilter.mesh = Style.GetQuadMesh();
+                    _materials[1].color = _materials[0].color = Style.GetColor(QuadValue.Block, data.alpha);
                     data.localAlpha = 0;
                     break;
                 }
@@ -87,12 +85,12 @@ public class QuadView : VisisonView<IQuad>
                 {
                     if ((data.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
                     {
-                        _materials[0].color = Color.red;
-                        _materials[1].color = Color.red;
-                        data.localEulerAngles = Vector3.zero;
+                        _meshFilter.mesh = Style.GetArrowMesh();
+                        _materials[1].color = _materials[0].color = Style.GetColor(data.value, data.alpha);
                     }
                     break;
                 }
         }
+        data.localEulerAngles = Style.GetAngles(data.value);
     }
 }

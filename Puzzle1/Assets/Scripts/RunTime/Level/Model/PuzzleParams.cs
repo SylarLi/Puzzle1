@@ -43,11 +43,17 @@
             pp.block = 0;
             pp.arrow = rank - 10;
         }
-        else
+        else if (rank <= 20)
         {
             pp.rows = pp.columns = 7;
             pp.block = new System.Random().Next(10);
             pp.arrow = 10 - pp.block;
+        }
+        else
+        {
+            pp.rows = pp.columns = 7;
+            pp.block = new System.Random().Next(15);
+            pp.arrow = 15 - pp.block;
         }
         return pp;
     }

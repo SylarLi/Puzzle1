@@ -11,7 +11,7 @@ public class GameContext : MonoBehaviour
 
     private void InitContext()
     {
-        DOTween.Init(false, false, LogBehaviour.Default).SetCapacity(100, 20);
+        DOTween.Init(false, false, LogBehaviour.Verbose).SetCapacity(100, 20);
     }
 
     private void InitLevel()

@@ -27,7 +27,7 @@ public class PuzzleView : VisisonView<IPuzzle>
             {
                 GameObject quadgo = new GameObject(string.Format("quad_{0}_{1}", i, j));
                 quadgo.transform.parent = transform;
-                data[i, j].localPosition = new Vector3(j * (Style.QuadSize + Style.QuadGap) + Style.QuadSize / 2 - center.x, i * (Style.QuadSize + Style.QuadGap) + Style.QuadSize / 2 - center.y, 0);
+                data[i, j].localPosition = new Vector3(j * (Style.QuadSize + Style.QuadGap) + Style.QuadSize / 2 - center.x, center.y - i * (Style.QuadSize + Style.QuadGap) - Style.QuadSize / 2, 0);
                 _quadViews[i, j] = quadgo.AddComponent<QuadView>();
                 _quadViews[i, j].data = data[i, j];
             }

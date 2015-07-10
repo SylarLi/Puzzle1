@@ -45,8 +45,9 @@ public class Resolver : IResolver
                 });
             }
             puzzle.touchEnable = false;
-            Sequence sequence = DOTween.Sequence();
-            ResolvePresent(sequence, puzzle, op, op, 0);
+            TweenDepot depot = new TweenDepot();
+            ResolvePresent(depot, puzzle, op, op, 0);
+            Sequence sequence = depot.ToSequence();
             sequence.OnComplete(() =>
             {
                 ResolveTouchData(puzzle, op);
@@ -62,7 +63,7 @@ public class Resolver : IResolver
         }
     }
 
-    private void ResolvePresent(Sequence sequence, IPuzzle puzzle, IOperation origin, IOperation op, float delay)
+    private void ResolvePresent(TweenDepot depot, IPuzzle puzzle, IOperation origin, IOperation op, float delay)
     {
         IQuad[] rowQuads = puzzle.GetRowQuads(op.row);
         if ((op.direction & QuadValue.Left) > 0)
@@ -72,31 +73,40 @@ public class Resolver : IResolver
                 // 左舷依次翻转
                 IQuad quad = rowQuads[i];
                 float qdelay = (Mathf.Abs(quad.column - op.column) - 1) * Style.QuadRollDelay;
-                if (quad.row == origin.row && quad.column == origin.column)
-                {
-                    break;
-                }
-                else if (quad.value == QuadValue.Block)
+                if (quad.value == QuadValue.Block)
                 {
                     Sequence s = DOTween.Sequence()
                                         .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(0, Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
-                                        .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles - new Vector3(0, Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
+                                        .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(0, -Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
                                         .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles, Style.QuadShakeDuration * 0.5f).SetEase(Ease.OutBack));
-                    sequence.Insert(delay + qdelay, s);
+                    depot.Add(delay + qdelay, s);
                     break;
                 }
                 else if ((quad.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
                 {
-                    ResolvePresent(sequence, puzzle, origin, new Operation(OpType.TouchClick, quad.row, quad.column, quad.value), delay + qdelay + Style.QuadRollDuration);
+                    ResolvePresent(depot, puzzle, origin, new Operation(OpType.TouchClick, quad.row, quad.column, quad.value), delay + qdelay + Style.QuadRollDuration);
                     break;
                 }
                 else
                 {
-                    Tweener t = DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, new Vector3(0, Style.QuadRollAngle, 0), Style.QuadRollDuration)
-                                       .SetId(Style.QuadUnifiedRotateId + "_" + quad.row + "_" + quad.column)
+                    string tid = Style.QuadUnifiedRotateId + "_" + quad.row + "_" + quad.column;
+                    TweenInfo lt = depot.GetFirst(tid);
+                    if (lt != null && Mathf.Abs(lt.atPosition - delay - qdelay) < Style.QuadRollDuration)
+                    {
+                        lt.Kill();
+                        Tweener t = DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, new Vector3(0, 0, Style.QuadConflictAngle), Style.QuadConflictDuration)
+                                           .SetEase(Ease.OutBack)
+                                           .SetRelative();
+                        depot.Add(delay + qdelay, t);
+                    }
+                    else
+                    {
+                        Tweener t = DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, new Vector3(0, Style.QuadRollAngle, 0), Style.QuadRollDuration)
+                                       .SetId(tid)
                                        .SetEase(Ease.OutBack)
                                        .SetRelative();
-                    sequence.Insert(delay + qdelay, t);
+                        depot.Add(delay + qdelay, t);
+                    }
                 }
             }
         }
@@ -107,31 +117,40 @@ public class Resolver : IResolver
                 // 右舷依次翻转
                 IQuad quad = rowQuads[i];
                 float qdelay = (Mathf.Abs(quad.column - op.column) - 1) * Style.QuadRollDelay;
-                if (quad.row == origin.row && quad.column == origin.column)
-                {
-                    break;
-                }
-                else if (quad.value == QuadValue.Block)
+                if (quad.value == QuadValue.Block)
                 {
                     Sequence s = DOTween.Sequence()
                                         .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(0, -Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
-                                        .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles - new Vector3(0, -Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
+                                        .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(0, Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
                                         .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles, Style.QuadShakeDuration * 0.5f).SetEase(Ease.OutBack));
-                    sequence.Insert(delay + qdelay, s);
+                    depot.Add(delay + qdelay, s);
                     break;
                 }
                 else if ((quad.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
                 {
-                    ResolvePresent(sequence, puzzle, origin, new Operation(OpType.TouchClick, quad.row, quad.column, quad.value), delay + qdelay + Style.QuadRollDuration);
+                    ResolvePresent(depot, puzzle, origin, new Operation(OpType.TouchClick, quad.row, quad.column, quad.value), delay + qdelay + Style.QuadRollDuration);
                     break;
                 }
                 else
                 {
-                    Tweener t = DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, new Vector3(0, -Style.QuadRollAngle, 0), Style.QuadRollDuration)
-                                       .SetId(Style.QuadUnifiedRotateId + "_" + quad.row + "_" + quad.column)
+                    string tid = Style.QuadUnifiedRotateId + "_" + quad.row + "_" + quad.column;
+                    TweenInfo lt = depot.GetFirst(tid);
+                    if (lt != null && Mathf.Abs(lt.atPosition - delay - qdelay) < Style.QuadRollDuration)
+                    {
+                        lt.Kill();
+                        Tweener t = DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, new Vector3(0, 0, -Style.QuadConflictAngle), Style.QuadConflictDuration)
+                                           .SetEase(Ease.OutBack)
+                                           .SetRelative();
+                        depot.Add(delay + qdelay, t);
+                    }
+                    else
+                    {
+                        Tweener t = DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, new Vector3(0, -Style.QuadRollAngle, 0), Style.QuadRollDuration)
+                                       .SetId(tid)
                                        .SetEase(Ease.OutBack)
                                        .SetRelative();
-                    sequence.Insert(delay + qdelay, t);
+                        depot.Add(delay + qdelay, t);
+                    }
                 }
             }
         }
@@ -143,31 +162,40 @@ public class Resolver : IResolver
                 // 上侧依次翻转
                 IQuad quad = columnQuads[i];
                 float qdelay = (Mathf.Abs(quad.row - op.row) - 1) * Style.QuadRollDelay;
-                if (quad.row == origin.row && quad.column == origin.column)
-                {
-                    break;
-                }
-                else if (quad.value == QuadValue.Block)
+                if (quad.value == QuadValue.Block)
                 {
                     Sequence s = DOTween.Sequence()
                                         .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(-Style.QuadShakeAngle, 0, 0), Style.QuadShakeDuration * 0.25f))
-                                        .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles - new Vector3(-Style.QuadShakeAngle, 0, 0), Style.QuadShakeDuration * 0.25f))
+                                        .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(Style.QuadShakeAngle, 0, 0), Style.QuadShakeDuration * 0.25f))
                                         .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles, Style.QuadShakeDuration * 0.5f).SetEase(Ease.OutBack));
-                    sequence.Insert(delay + qdelay, s);
+                    depot.Add(delay + qdelay, s);
                     break;
                 }
                 else if ((quad.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
                 {
-                    ResolvePresent(sequence, puzzle, origin, new Operation(OpType.TouchClick, quad.row, quad.column, quad.value), delay + qdelay + Style.QuadRollDuration);
+                    ResolvePresent(depot, puzzle, origin, new Operation(OpType.TouchClick, quad.row, quad.column, quad.value), delay + qdelay + Style.QuadRollDuration);
                     break;
                 }
                 else
                 {
-                    Tweener t = DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, new Vector3(-Style.QuadRollAngle, 0, 0), Style.QuadRollDuration)
-                                       .SetId(Style.QuadUnifiedRotateId + "_" + quad.row + "_" + quad.column)
+                    string tid = Style.QuadUnifiedRotateId + "_" + quad.row + "_" + quad.column;
+                    TweenInfo lt = depot.GetFirst(tid);
+                    if (lt != null && Mathf.Abs(lt.atPosition - delay - qdelay) < Style.QuadRollDuration)
+                    {
+                        lt.Kill();
+                        Tweener t = DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, new Vector3(0, 0, Style.QuadConflictAngle), Style.QuadConflictDuration)
+                                           .SetEase(Ease.OutBack)
+                                           .SetRelative();
+                        depot.Add(delay + qdelay, t);
+                    }
+                    else
+                    {
+                        Tweener t = DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, new Vector3(-Style.QuadRollAngle, 0, 0), Style.QuadRollDuration)
+                                       .SetId(tid)
                                        .SetEase(Ease.OutBack)
                                        .SetRelative();
-                    sequence.Insert(delay + qdelay, t);
+                        depot.Add(delay + qdelay, t);
+                    }
                 }
             }
         }
@@ -178,31 +206,40 @@ public class Resolver : IResolver
                 // 下侧依次翻转
                 IQuad quad = columnQuads[i];
                 float qdelay = (Mathf.Abs(quad.row - op.row) - 1) * Style.QuadRollDelay;
-                if (quad.row == origin.row && quad.column == origin.column)
-                {
-                    break;
-                }
-                else if (quad.value == QuadValue.Block)
+                if (quad.value == QuadValue.Block)
                 {
                     Sequence s = DOTween.Sequence()
                                         .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(Style.QuadShakeAngle, 0, 0), Style.QuadShakeDuration * 0.25f))
                                         .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles - new Vector3(Style.QuadShakeAngle, 0, 0), Style.QuadShakeDuration * 0.25f))
                                         .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles, Style.QuadShakeDuration * 0.5f).SetEase(Ease.OutBack));
-                    sequence.Insert(delay + qdelay, s);
+                    depot.Add(delay + qdelay, s);
                     break;
                 }
                 else if ((quad.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
                 {
-                    ResolvePresent(sequence, puzzle, origin, new Operation(OpType.TouchClick, quad.row, quad.column, quad.value), delay + qdelay + Style.QuadRollDuration);
+                    ResolvePresent(depot, puzzle, origin, new Operation(OpType.TouchClick, quad.row, quad.column, quad.value), delay + qdelay + Style.QuadRollDuration);
                     break;
                 }
                 else
                 {
-                    Tweener t = DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, new Vector3(Style.QuadRollAngle, 0, 0), Style.QuadRollDuration)
-                                       .SetId(Style.QuadUnifiedRotateId + "_" + quad.row + "_" + quad.column)
+                    string tid = Style.QuadUnifiedRotateId + "_" + quad.row + "_" + quad.column;
+                    TweenInfo lt = depot.GetFirst(tid);
+                    if (lt != null && Mathf.Abs(lt.atPosition - delay - qdelay) < Style.QuadRollDuration)
+                    {
+                        lt.Kill();
+                        Tweener t = DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, new Vector3(0, 0, -Style.QuadConflictAngle), Style.QuadConflictDuration)
+                                           .SetEase(Ease.OutBack)
+                                           .SetRelative();
+                        depot.Add(delay + qdelay, t);
+                    }
+                    else
+                    {
+                        Tweener t = DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, new Vector3(Style.QuadRollAngle, 0, 0), Style.QuadRollDuration)
+                                       .SetId(tid)
                                        .SetEase(Ease.OutBack)
                                        .SetRelative();
-                    sequence.Insert(delay + qdelay, t);
+                        depot.Add(delay + qdelay, t);
+                    }
                 }
             }
         }
@@ -278,12 +315,7 @@ public class Resolver : IResolver
         // from闭to开
         for (int i = from; i != to; i += step)
         {
-            if (quads[i].row == origin.row && quads[i].column == origin.column)
-            {   
-                // 回溯到起点时，跳出
-                break;
-            }
-            else if (quads[i].value == QuadValue.Block)
+            if (quads[i].value == QuadValue.Block)
             {
                 break;
             }
@@ -297,6 +329,88 @@ public class Resolver : IResolver
                 quads[i].value = (QuadValue)(QuadValue.Back - quads[i].value);
             }
         }
+    }
+
+    public bool ResolveIsLoop(IPuzzle puzzle)
+    {
+        bool result = false;
+        for (int i = 0; i < puzzle.rows; i++)
+        {
+            for (int j = 0; j < puzzle.columns; j++)
+            {
+                if ((puzzle[i, j].value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
+                {
+                    if (IsLoop(new List<IQuad>(), puzzle, new Operation(OpType.TouchClick, i, j, puzzle[i, j].value)))
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    private bool IsLoop(List<IQuad> arrows, IPuzzle puzzle, IOperation op)
+    {
+        IQuad[] rowQuads = puzzle.GetRowQuads(op.row);
+        if ((op.direction & QuadValue.Left) > 0)
+        {
+            if (IsLoopLine(arrows, puzzle, rowQuads, op.column - 1, -1, -1))
+            {
+                return true;
+            }
+        }
+        if ((op.direction & QuadValue.Right) > 0)
+        {
+            if (IsLoopLine(arrows, puzzle, rowQuads, op.column + 1, rowQuads.Length, 1))
+            {
+                return true;
+            }
+        }
+        IQuad[] columnQuads = puzzle.GetColumnQuads(op.column);
+        if ((op.direction & QuadValue.Up) > 0)
+        {
+            if (IsLoopLine(arrows, puzzle, columnQuads, op.row - 1, -1, -1))
+            {
+                return true;
+            }
+        }
+        if ((op.direction & QuadValue.Down) > 0)
+        {
+            if (IsLoopLine(arrows, puzzle, columnQuads, op.row + 1, columnQuads.Length, 1))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private bool IsLoopLine(List<IQuad> arrows, IPuzzle puzzle, IQuad[] quads, int from, int to, int step)
+    {
+        bool result = false;
+        // from闭to开
+        for (int i = from; i != to; i += step)
+        {
+            if (quads[i].value == QuadValue.Block)
+            {
+                break;
+            }
+            else if ((quads[i].value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
+            {
+                if (arrows.IndexOf(quads[i]) == -1)
+                {
+                    arrows.Add(quads[i]);
+                    result = IsLoop(arrows, puzzle, new Operation(OpType.TouchClick, quads[i].row, quads[i].column, quads[i].value));
+                }
+                else
+                {
+                    result = true;
+                }
+                break;
+            }
+        }
+        return result;
     }
 
     public bool IsSolved(IPuzzle puzzle)

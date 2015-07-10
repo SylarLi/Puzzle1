@@ -15,12 +15,19 @@ public static class Style
     public const float QuadShakeAngle = 45f;
     public const float QuadShakeDuration = 0.25f;
 
+    public const float QuadConflictAngle = 90f;
+    public const float QuadConflictDuration = 0.25f;
+
     public const float PuzzleDepth = 20;
 
     public const string QuadUnifiedRotateId = "Rotate";
     public const string QuadUnifiedScaleId = "Scale";
 
     private static Shader quadShader;
+
+    private static Mesh quadMesh;
+
+    private static Mesh arrowMesh;
 
     public static Shader GetQuadShader()
     {
@@ -31,58 +38,124 @@ public static class Style
         return quadShader;
     }
 
-    public static Mesh GetQuadMesh(float size = 1)
+    public static Mesh GetQuadMesh()
     {
-        float halfSize = size / 2f;
-        Mesh mesh = new Mesh();
-        mesh.vertices = new Vector3[]
+        if (quadMesh == null)
         {
-            new Vector3(-halfSize, halfSize, 0),
-            new Vector3(halfSize, -halfSize, 0),
-            new Vector3(-halfSize, -halfSize, 0),
-            new Vector3(halfSize, halfSize, 0),
+            float size = QuadSize;
+            float halfSize = size / 2f;
+            quadMesh = new Mesh();
+            quadMesh.vertices = new Vector3[]
+            {
+                new Vector3(-halfSize, halfSize, 0),
+                new Vector3(halfSize, -halfSize, 0),
+                new Vector3(-halfSize, -halfSize, 0),
+                new Vector3(halfSize, halfSize, 0),
 
-            new Vector3(-halfSize, halfSize, 0),
-            new Vector3(halfSize, -halfSize, 0),
-            new Vector3(-halfSize, -halfSize, 0),
-            new Vector3(halfSize, halfSize, 0),
-        };
-        mesh.normals = new Vector3[]
-        {
-            -Vector3.forward,
-            -Vector3.forward,
-            -Vector3.forward,
-            -Vector3.forward,
+                new Vector3(-halfSize, halfSize, 0),
+                new Vector3(halfSize, -halfSize, 0),
+                new Vector3(-halfSize, -halfSize, 0),
+                new Vector3(halfSize, halfSize, 0),
+            };
+            quadMesh.normals = new Vector3[]
+            {
+                -Vector3.forward,
+                -Vector3.forward,
+                -Vector3.forward,
+                -Vector3.forward,
 
-            Vector3.forward,
-            Vector3.forward,
-            Vector3.forward,
-            Vector3.forward,
-        };
-        mesh.colors = new Color[]
-        {
-            Color.white,
-            Color.white,
-            Color.white,
-            Color.white,
+                Vector3.forward,
+                Vector3.forward,
+                Vector3.forward,
+                Vector3.forward,
+            };
+            quadMesh.colors = new Color[]
+            {
+                Color.white,
+                Color.white,
+                Color.white,
+                Color.white,
 
-            Color.white,
-            Color.white,
-            Color.white,
-            Color.white,
-        };
-        mesh.subMeshCount = 2;
-        mesh.SetTriangles(new int[]
+                Color.white,
+                Color.white,
+                Color.white,
+                Color.white,
+            };
+            quadMesh.subMeshCount = 2;
+            quadMesh.SetTriangles(new int[]
+            {
+                0, 1, 2,
+                0, 3, 1,
+            }, 0);
+            quadMesh.SetTriangles(new int[]
+            {
+                6, 5, 4,
+                5, 7, 4
+            }, 1);
+        }
+        return quadMesh;
+    }
+
+    public static Mesh GetArrowMesh()
+    {
+        if (arrowMesh == null)
         {
-            0, 1, 2,
-            0, 3, 1,
-        }, 0);
-        mesh.SetTriangles(new int[]
-        {
-            6, 5, 4,
-            5, 7, 4
-        }, 1);
-        return mesh;
+            float size = QuadSize;
+            float up_y = size * 0.4f;
+            float down_y = -size * 0.3f;
+            float left_x = -size * 0.3f;
+            float right_x = size * 0.3f;
+            float center_y = -size * 0.1f;
+            arrowMesh = new Mesh();
+            arrowMesh.vertices = new Vector3[]
+            {
+                new Vector3(0, up_y, 0),
+                new Vector3(0, center_y, 0),
+                new Vector3(left_x, down_y, 0),
+                new Vector3(right_x, down_y, 0),
+
+                new Vector3(0, up_y, 0),
+                new Vector3(0, 0, 0),
+                new Vector3(left_x, down_y, 0),
+                new Vector3(right_x, down_y, 0),
+            };
+            arrowMesh.normals = new Vector3[]
+            {
+                -Vector3.forward,
+                -Vector3.forward,
+                -Vector3.forward,
+                -Vector3.forward,
+
+                Vector3.forward,
+                Vector3.forward,
+                Vector3.forward,
+                Vector3.forward,
+            };
+            arrowMesh.colors = new Color[]
+            {
+                Color.white,
+                Color.white,
+                Color.white,
+                Color.white,
+
+                Color.white,
+                Color.white,
+                Color.white,
+                Color.white,
+            };
+            arrowMesh.subMeshCount = 2;
+            arrowMesh.SetTriangles(new int[]
+            {
+                0, 1, 2,
+                0, 3, 1,
+            }, 0);
+            arrowMesh.SetTriangles(new int[]
+            {
+                6, 5, 4,
+                5, 7, 4
+            }, 1);
+        }
+        return arrowMesh;
     }
 
     public static Color GetColor(QuadValue value, float alpha = 1)
@@ -105,7 +178,71 @@ public static class Style
                     color = new Color(0.4f, 0.2f, 0, alpha);
                     break;
                 }
+            default:
+                {
+                    if ((value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
+                    {
+                        color = new Color(0, 0.6f, 0, alpha);
+                    }
+                    break;
+                }
         }
         return color;
+    }
+
+    public static Vector3 GetAngles(QuadValue value)
+    {
+        Vector3 angles = Vector3.zero;
+        switch (value)
+        {
+            case QuadValue.Front:
+            case QuadValue.Back:
+            case QuadValue.Block:
+                {
+                    angles = Vector3.zero;
+                    break;
+                }
+            case QuadValue.Left | QuadValue.Up:
+                {
+                    angles = new Vector3(0, 0, 45);
+                    break;
+                }
+            case QuadValue.Right | QuadValue.Up:
+                {
+                    angles = new Vector3(0, 0, -45);
+                    break;
+                }
+            case QuadValue.Left | QuadValue.Down:
+                {
+                    angles = new Vector3(0, 0, 135);
+                    break;
+                }
+            case QuadValue.Right | QuadValue.Down:
+                {
+                    angles = new Vector3(0, 0, -135);
+                    break;
+                }
+            case QuadValue.Left:
+                {
+                    angles = new Vector3(0, 0, 90);
+                    break;
+                }
+            case QuadValue.Up:
+                {
+                    angles = new Vector3(0, 0, 0);
+                    break;
+                }
+            case QuadValue.Right:
+                {
+                    angles = new Vector3(0, 0, -90);
+                    break;
+                }
+            case QuadValue.Down:
+                {
+                    angles = new Vector3(0, 0, 180);
+                    break;
+                }
+        }
+        return angles;
     }
 }

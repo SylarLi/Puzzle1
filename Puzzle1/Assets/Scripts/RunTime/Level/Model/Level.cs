@@ -19,14 +19,16 @@ public class Level : EventDispatcher, ILevel
         _record.Clear();
         _puzzle = new Puzzle(pp.rows, pp.columns);
         int i = 0;
-        for (i = 0; i < puzzle.rows; i++)
+        for (i = 0; i < _puzzle.rows; i++)
         {
-            for (int j = 0; j < puzzle.columns; j++)
+            for (int j = 0; j < _puzzle.columns; j++)
             {
                 _puzzle[i, j] = new Quad(i, j, QuadValue.Front);
             }
         }
+
         System.Random random = new System.Random();
+
         i = pp.block;
         while (i > 0)
         {
@@ -35,17 +37,34 @@ public class Level : EventDispatcher, ILevel
             _puzzle[row, column].value = QuadValue.Block;
             i--;
         }
-        i = pp.arrow;
-        while (i > 0)
+
+        QuadValue[] diretions = new QuadValue[] { QuadValue.Left, QuadValue.Right, QuadValue.Up, QuadValue.Down, QuadValue.Left | QuadValue.Up, QuadValue.Right | QuadValue.Up, QuadValue.Left | QuadValue.Down, QuadValue.Right | QuadValue.Down };
+        do
         {
-            int row = random.Next(_puzzle.rows);
-            int column = random.Next(_puzzle.columns);
-            if (_puzzle[row, column].value != QuadValue.Block)
+            i = pp.arrow;
+            for (i = 0; i < _puzzle.rows; i++)
             {
-                _puzzle[row, column].value = QuadValue.Left;
-                i--;
+                for (int j = 0; j < _puzzle.columns; j++)
+                {
+                    if ((_puzzle[i, j].value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
+                    {
+                        _puzzle[i, j] = new Quad(i, j, QuadValue.Front);
+                    }
+                }
+            }
+            while (i > 0)
+            {
+                int row = random.Next(_puzzle.rows);
+                int column = random.Next(_puzzle.columns);
+                if (_puzzle[row, column].value == QuadValue.Front || _puzzle[row, column].value == QuadValue.Back)
+                {
+                    _puzzle[row, column].value = diretions[random.Next(diretions.Length)];
+                    i--;
+                }
             }
         }
+        while (_resolver.ResolveIsLoop(puzzle));
+
         i = 10;
         while (i > 0 || _resolver.IsSolved(_puzzle))
         {
@@ -53,6 +72,19 @@ public class Level : EventDispatcher, ILevel
             _record.Push(op);
             _resolver.ResolveTouchData(_puzzle, op);
             i--;
+        }
+    }
+
+    public void MakePuzzle(QuadValue[,] values)
+    {
+        _record.Clear();
+        _puzzle = new Puzzle(values.GetLength(0), values.GetLength(1));
+        for (int i = 0; i < _puzzle.rows; i++)
+        {
+            for (int j = 0; j < _puzzle.columns; j++)
+            {
+                _puzzle[i, j] = new Quad(i, j, values[i, j]);
+            }
         }
     }
 
