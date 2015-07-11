@@ -38,33 +38,36 @@ public class Level : EventDispatcher, ILevel
             i--;
         }
 
-        // QuadValue.Left | QuadValue.Up, QuadValue.Right | QuadValue.Up, QuadValue.Left | QuadValue.Down, QuadValue.Right | QuadValue.Down
-        QuadValue[] diretions = new QuadValue[] { QuadValue.Left, QuadValue.Right, QuadValue.Up, QuadValue.Down };
-        do
+        if (pp.arrow > 0)
         {
-            i = pp.arrow;
-            for (i = 0; i < _puzzle.rows; i++)
+            // QuadValue.Left | QuadValue.Up, QuadValue.Right | QuadValue.Up, QuadValue.Left | QuadValue.Down, QuadValue.Right | QuadValue.Down
+            QuadValue[] diretions = new QuadValue[] { QuadValue.Left, QuadValue.Right, QuadValue.Up, QuadValue.Down };
+            do
             {
-                for (int j = 0; j < _puzzle.columns; j++)
+                for (i = 0; i < _puzzle.rows; i++)
                 {
-                    if ((_puzzle[i, j].value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
+                    for (int j = 0; j < _puzzle.columns; j++)
                     {
-                        _puzzle[i, j] = new Quad(i, j, QuadValue.Front);
+                        if ((_puzzle[i, j].value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
+                        {
+                            _puzzle[i, j] = new Quad(i, j, QuadValue.Front);
+                        }
+                    }
+                }
+                i = pp.arrow;
+                while (i > 0)
+                {
+                    int row = random.Next(_puzzle.rows);
+                    int column = random.Next(_puzzle.columns);
+                    if (_puzzle[row, column].value == QuadValue.Front || _puzzle[row, column].value == QuadValue.Back)
+                    {
+                        _puzzle[row, column].value = diretions[random.Next(diretions.Length)];
+                        i--;
                     }
                 }
             }
-            while (i > 0)
-            {
-                int row = random.Next(_puzzle.rows);
-                int column = random.Next(_puzzle.columns);
-                if (_puzzle[row, column].value == QuadValue.Front || _puzzle[row, column].value == QuadValue.Back)
-                {
-                    _puzzle[row, column].value = diretions[random.Next(diretions.Length)];
-                    i--;
-                }
-            }
+            while (_resolver.ResolveIsLoop(puzzle));
         }
-        while (_resolver.ResolveIsLoop(puzzle));
 
         i = 10;
         while (i > 0 || _resolver.IsSolved(_puzzle))

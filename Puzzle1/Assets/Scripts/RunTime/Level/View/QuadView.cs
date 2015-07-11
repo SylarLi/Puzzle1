@@ -91,10 +91,12 @@ public class QuadView : VisisonView<IQuad>
             quad.touchEnable = false;
             quad.material = VisionMaterial.ParticleAdd;
             quadView.data = quad;
+            quadgo.SetActive(false);
             Tween t1 = DOTween.To(() => quad.localScale, x => quad.localScale = x, quad.localScale * Style.QuadSprinkleScale, Style.QuadSprinkleDuration).SetEase(Ease.OutCubic);
             Tween t2 = DOTween.To(() => quad.localAlpha, x => quad.localAlpha = x, 0f, Style.QuadSprinkleDuration).SetEase(Ease.OutCubic);
             Sequence sequence = DOTween.Sequence();
             sequence.AppendInterval(spark.delay)
+                    .AppendCallback(() => quadgo.SetActive(true))
                     .Append(t1)
                     .Join(t2)
                     .OnComplete(() => GameObject.Destroy(quadView.gameObject));
