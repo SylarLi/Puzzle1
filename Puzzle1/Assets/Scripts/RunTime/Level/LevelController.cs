@@ -38,22 +38,18 @@ public class LevelController
         if (memory != null)
         {
             // 淡出
-            Tween out1 = DOTween.To(() => memory.puzzle.localPosition, x => memory.puzzle.localPosition = x, memory.puzzle.localPosition + new Vector3(0, 0, -20), 1)
+            Tween out1 = DOTween.To(() => memory.puzzle.localPosition, x => memory.puzzle.localPosition = x, memory.puzzle.localPosition + new Vector3(0, -20, 0), 1)
                                 .SetEase(Ease.InOutCubic);
-            Tween out2 = DOTween.To(() => memory.puzzle.localAlpha, x => memory.puzzle.localAlpha = x, 0, 1)
-                                .SetEase(Ease.InOutCubic);
-            sequence.Join(out1).Join(out2);
+            sequence.Join(out1);
         }
 
         // Next
         NextLevel();
 
         // 淡入
-        Tween in1 = DOTween.To(() => level.puzzle.localPosition, x => level.puzzle.localPosition = x, level.puzzle.localPosition + new Vector3(0, 0, 20), 1)
+        Tween in1 = DOTween.To(() => level.puzzle.localPosition, x => level.puzzle.localPosition = x, level.puzzle.localPosition + new Vector3(0, 20, 0), 1)
                             .SetEase(Ease.InOutCubic).From();
-        Tween in2 = DOTween.To(() => level.puzzle.localAlpha, x => level.puzzle.localAlpha = x, 0, 1)
-                            .SetEase(Ease.InOutCubic).From();
-        sequence.Join(in1).Join(in2);
+        sequence.Join(in1);
 
         sequence.OnComplete(() =>
         {

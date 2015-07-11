@@ -1,4 +1,4 @@
-﻿Shader "Puzzle1/Quad"
+﻿Shader "Puzzle1/Unlit"
  {
 	Properties 
 	{

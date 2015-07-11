@@ -30,13 +30,7 @@ public class QuadView : VisisonView<IQuad>
     private void InitQuadView()
     {
         _meshFilter = gameObject.AddComponent<MeshFilter>();
-        _materials = new Material[2]
-        {
-            Style.GetQuadMaterial(),
-            Style.GetQuadMaterial(),
-        };
         _meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        _meshRenderer.sharedMaterials = _materials;
         _boxCollider = gameObject.AddComponent<BoxCollider>();
         _boxCollider.center = Vector3.zero;
         _boxCollider.size = new Vector3(1, 1, 0.001f);
@@ -45,21 +39,37 @@ public class QuadView : VisisonView<IQuad>
     protected override void AlphaChangeHandler(IEvent e)
     {
         base.AlphaChangeHandler(e);
-        Color32[] source = _meshFilter.mesh.colors32;
-        Color32[] colors = new Color32[source.Length];
-        for (int i = colors.Length - 1; i >= 0; i--)
+        if (_meshType != SimplePoolItemType.None)
         {
-            Color color = source[i];
-            color.a = data.alpha;
-            colors[i] = color;
+            Color32[] source = _meshFilter.mesh.colors32;
+            Color32[] colors = new Color32[source.Length];
+            for (int i = colors.Length - 1; i >= 0; i--)
+            {
+                Color color = source[i];
+                color.a = data.alpha;
+                colors[i] = color;
+            }
+            _meshFilter.mesh.colors32 = colors;
         }
-        _meshFilter.mesh.colors32 = colors;
     }
 
     protected override void LocalScaleChangeHandler(IEvent e)
     {
         base.LocalScaleChangeHandler(e);
         _boxCollider.size = new Vector3(1 / data.localScale.x, 1 / data.localScale.y, _boxCollider.size.z);
+    }
+
+    protected override void MaterialChangeHandler(IEvent e)
+    {
+        base.MaterialChangeHandler(e);
+        Material material = Style.GetQuadMaterial(data.material);
+        _meshRenderer.sharedMaterials = new Material[2] { material, material };
+    }
+
+    protected override void TouchEnableChangeHandler(IEvent e)
+    {
+        base.TouchEnableChangeHandler(e);
+        _boxCollider.enabled = data.touchEnable;
     }
 
     protected override void DoSparkHandler(IEvent e)
@@ -79,6 +89,7 @@ public class QuadView : VisisonView<IQuad>
             quad.localEulerAngles = data.localEulerAngles;
             quad.localScale = data.localScale;
             quad.touchEnable = false;
+            quad.material = VisionMaterial.ParticleAdd;
             quadView.data = quad;
             Tween t1 = DOTween.To(() => quad.localScale, x => quad.localScale = x, quad.localScale * Style.QuadSprinkleScale, Style.QuadSprinkleDuration).SetEase(Ease.OutCubic);
             Tween t2 = DOTween.To(() => quad.localAlpha, x => quad.localAlpha = x, 0f, Style.QuadSprinkleDuration).SetEase(Ease.OutCubic);
@@ -96,30 +107,12 @@ public class QuadView : VisisonView<IQuad>
         {
             SimplePool.inst.Return(_meshType, _meshFilter.mesh);
         }
-        data.localEulerAngles = Style.GetAngles(data.value);
-        Color color1 = Color.white;
-        Color color2 = Color.white;
         switch (data.value)
         {
             case QuadValue.Front:
-                {
-                    _meshType = SimplePoolItemType.QuadMesh;
-                    color1 = Style.GetColor(QuadValue.Front, data.alpha);
-                    color2 = Style.GetColor(QuadValue.Back, data.alpha);
-                    break;
-                }
             case QuadValue.Back:
                 {
                     _meshType = SimplePoolItemType.QuadMesh;
-                    color1 = Style.GetColor(QuadValue.Back, data.alpha);
-                    color2 = Style.GetColor(QuadValue.Front, data.alpha);
-                    break;
-                }
-            case QuadValue.Block:
-                {
-                    data.localAlpha = 0;
-                    _meshType = SimplePoolItemType.QuadMesh;
-                    color1 = color2 = Style.GetColor(QuadValue.Block, data.alpha);
                     break;
                 }
             default:
@@ -127,18 +120,16 @@ public class QuadView : VisisonView<IQuad>
                     if ((data.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
                     {
                         _meshType = SimplePoolItemType.ArrowMesh;
-                        color1 = color2 = Style.GetColor(data.value, data.alpha);
                     }
                     break;
                 }
         }
-        Mesh mesh = SimplePool.inst.Get<Mesh>(_meshType);
-        Color32[] colors = new Color32[mesh.colors32.Length];
-        for (int i = colors.Length - 1; i >= 0; i--)
+        if (_meshType != SimplePoolItemType.None)
         {
-            colors[i] = i < 4 ? color1 : color2;
+            Mesh mesh = SimplePool.inst.Get<Mesh>(_meshType);
+            mesh.colors32 = Style.GetColors(data.value, data.alpha);
+            _meshFilter.mesh = mesh;
         }
-        mesh.colors32 = colors;
-        _meshFilter.mesh = mesh;
+        data.localEulerAngles = Style.GetAngles(data.value);
     }
 }

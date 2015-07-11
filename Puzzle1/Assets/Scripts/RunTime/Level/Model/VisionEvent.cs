@@ -6,6 +6,7 @@ public class VisionEvent : Event
     public const string LocalPositionChange = "LocalPositionChange";
     public const string LocalEulerAnglesChange = "LocalEulerAnglesChange";
     public const string LocalScaleChange = "LocalScaleChange";
+    public const string MaterialChange = "MaterialChange";
     public const string TouchEnableChange = "TouchEnableChange";
 
     public const string DoSpark = "DoSpark";

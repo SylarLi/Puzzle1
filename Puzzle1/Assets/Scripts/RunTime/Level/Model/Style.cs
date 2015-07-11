@@ -20,34 +20,41 @@ public static class Style
 
     public const float QuadSprinkleScale = 2.5f;
     public const float QuadSprinkleDepthAddition = -5f;
-    public const float QuadSprinkleDuration = 0.7f;
+    public const float QuadSprinkleDuration = 0.5f;
 
     public const float PuzzleDepth = 20;
 
     public const string QuadUnifiedRotateId = "Rotate";
     public const string QuadUnifiedScaleId = "Scale";
 
-    private static Shader quadShader;
+    private static Material unlit;
+    private static Material particleAdd;
+    private static Material diffuse;
 
-    private static Material quadMaterial;
 
-    public static Shader GetQuadShader()
+    public static Material GetQuadMaterial(VisionMaterial type)
     {
-        if (quadShader == null)
+        Material material = null;
+        switch (type)
         {
-            quadShader = Resources.Load<Shader>("Quad");
+            case VisionMaterial.Unlit:
+                {
+                    material = unlit != null ? unlit : (unlit = new Material(Resources.Load<Shader>("QuadUnlit")));
+                    break;
+                }
+            case VisionMaterial.ParticleAdd:
+                {
+                    material = particleAdd != null ? particleAdd : (particleAdd = new Material(Resources.Load<Shader>("QuadParticleAdd")));
+                    break;
+                }
+            default:
+                {
+                    material = diffuse != null ? diffuse : (diffuse = new Material(Resources.Load<Shader>("QuadDiffuse")));
+                    break;
+                }
         }
-        return quadShader;
-    }
-
-    public static Material GetQuadMaterial()
-    {
-        if (quadMaterial == null)
-        {
-            quadMaterial = new Material(GetQuadShader());
-        }
-        return quadMaterial;
-    }
+        return material;
+    } 
 
     public static Mesh GetQuadMesh()
     {
@@ -145,36 +152,39 @@ public static class Style
         return arrowMesh;
     }
 
-    public static Color GetColor(QuadValue value, float alpha = 1)
+    public static Color32[] GetColors(QuadValue value, float alpha = 1)
     {
-        Color color = Color.white;
+        Color32[] colors = new Color32[8];
+        Color color1 = Color.white;
+        Color color2 = Color.white;
         switch (value)
         {
             case QuadValue.Front:
                 {
-                    color = new Color(1, 0.5f, 0, alpha);
+                    color1 = new Color(1, 0.5f, 0, alpha);
+                    color2 = new Color(0, 0.5f, 1, alpha);
                     break;
                 }
             case QuadValue.Back:
                 {
-                    color = new Color(0, 0.5f, 1, alpha);
-                    break;
-                }
-            case QuadValue.Block:
-                {
-                    color = new Color(0.4f, 0.2f, 0, alpha);
+                    color1 = new Color(0, 0.5f, 1, alpha);
+                    color2 = new Color(1, 0.5f, 0, alpha);
                     break;
                 }
             default:
                 {
                     if ((value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
                     {
-                        color = new Color(0, 0.6f, 0, alpha);
+                        color1 = color2 = new Color(0, 0.6f, 0, alpha);
                     }
                     break;
                 }
         }
-        return color;
+        for (int i = colors.Length - 1; i >= 0; i--)
+        {
+            colors[i] = i < 4 ? color1 : color2;
+        }
+        return colors;
     }
 
     public static Vector3 GetAngles(QuadValue value)
@@ -184,7 +194,6 @@ public static class Style
         {
             case QuadValue.Front:
             case QuadValue.Back:
-            case QuadValue.Block:
                 {
                     angles = Vector3.zero;
                     break;
@@ -231,5 +240,10 @@ public static class Style
                 }
         }
         return angles;
+    }
+
+    public static bool GetTouchEnable(QuadValue value)
+    {
+        return value != QuadValue.Block;
     }
 }

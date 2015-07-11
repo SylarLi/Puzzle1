@@ -13,6 +13,8 @@ public abstract class Vision : EventDispatcher, IVision
 
     private Vector3 _localScale;
 
+    private VisionMaterial _material;
+
     private bool _touchEnable;
 
     public Vision()
@@ -22,6 +24,8 @@ public abstract class Vision : EventDispatcher, IVision
         _localPosition = Vector3.zero;
         _localEulerAngles = Vector3.zero;
         _localScale = Vector3.one;
+        _material = VisionMaterial.Diffuse;
+        _touchEnable = false;
     }
 
     public float alpha
@@ -115,6 +119,22 @@ public abstract class Vision : EventDispatcher, IVision
             {
                 _localScale = value;
                 DispatchEvent(new VisionEvent(VisionEvent.LocalScaleChange));
+            }
+        }
+    }
+
+    public VisionMaterial material
+    {
+        get
+        {
+            return _material;
+        }
+        set
+        {
+            if (_material != value)
+            {
+                _material = value;
+                DispatchEvent(new VisionEvent(VisionEvent.MaterialChange));
             }
         }
     }
