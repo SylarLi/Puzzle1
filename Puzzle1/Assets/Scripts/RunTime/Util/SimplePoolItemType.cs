@@ -2,5 +2,4 @@
 {
     None,
     QuadMesh,
-    ArrowMesh,
 }

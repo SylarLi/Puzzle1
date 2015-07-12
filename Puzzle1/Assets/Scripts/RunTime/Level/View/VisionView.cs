@@ -26,6 +26,7 @@ public class VisisonView<T> : MonoBehaviour where T : IVision
         _data.AddEventListener(VisionEvent.LocalEulerAnglesChange, LocalEulerAnglesChangeHandler);
         _data.AddEventListener(VisionEvent.LocalScaleChange, LocalScaleChangeHandler);
         _data.AddEventListener(VisionEvent.MaterialChange, MaterialChangeHandler);
+        _data.AddEventListener(VisionEvent.UVOffsetsChange, UVOffsetsChangeHandler);
         _data.AddEventListener(VisionEvent.TouchEnableChange, TouchEnableChangeHandler);
         _data.AddEventListener(VisionEvent.DoSpark, DoSparkHandler);
     }
@@ -37,6 +38,7 @@ public class VisisonView<T> : MonoBehaviour where T : IVision
         LocalEulerAnglesChangeHandler(null);
         LocalScaleChangeHandler(null);
         MaterialChangeHandler(null);
+        UVOffsetsChangeHandler(null);
         TouchEnableChangeHandler(null);
     }
 
@@ -61,6 +63,11 @@ public class VisisonView<T> : MonoBehaviour where T : IVision
     }
 
     protected virtual void MaterialChangeHandler(IEvent e)
+    {
+
+    }
+
+    protected virtual void UVOffsetsChangeHandler(IEvent e)
     {
 
     }

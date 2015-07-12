@@ -17,6 +17,8 @@ public interface IVision : IEventDispatcher
 
     VisionMaterial material { get; set; }
 
+    Vector2[] uvOffsets { get; set; }           // 正面UVOffse+反面UVOffset
+
     bool touchEnable { get; set; }
 
     void Spark(VisionSpark spark);

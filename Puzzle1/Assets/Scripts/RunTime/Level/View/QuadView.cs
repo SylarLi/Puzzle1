@@ -66,6 +66,24 @@ public class QuadView : VisisonView<IQuad>
         _meshRenderer.sharedMaterials = new Material[2] { material, material };
     }
 
+    protected override void UVOffsetsChangeHandler(IEvent e)
+    {
+        base.UVOffsetsChangeHandler(e);
+        if (_meshType != SimplePoolItemType.None)
+        {
+            Vector2[] uvs = new Vector2[Style.QuadUV.Length];
+            for (int i = uvs.Length - 1; i >= 0; i--)
+            {
+                Vector2 uv = Style.QuadUV[i];
+                int index = i / 4;
+                uv.x = data.uvOffsets[index].x + uv.x * Style.QuadUVTilling.x;
+                uv.y = data.uvOffsets[index].y + uv.y * Style.QuadUVTilling.y;
+                uvs[i] = uv;
+            }
+            _meshFilter.mesh.uv = uvs;
+        }
+    }
+
     protected override void TouchEnableChangeHandler(IEvent e)
     {
         base.TouchEnableChangeHandler(e);
@@ -82,18 +100,18 @@ public class QuadView : VisisonView<IQuad>
             quadgo.transform.parent = transform.parent;
             quadgo.layer = Layer.Effect;
             QuadView quadView = quadgo.AddComponent<QuadView>();
-            IQuad quad = data.Clone();
-            quad.localAlpha = data.localAlpha;
-            quad.parentAlpha = data.parentAlpha;
-            quad.localPosition = data.localPosition + new Vector3(0, 0, -0.001f);
-            quad.localEulerAngles = data.localEulerAngles;
-            quad.localScale = data.localScale;
-            quad.touchEnable = false;
-            quad.material = VisionMaterial.ParticleAdd;
-            quadView.data = quad;
+            quadView.data = data.Clone();
+            quadView.data.localAlpha = data.localAlpha;
+            quadView.data.parentAlpha = data.parentAlpha;
+            quadView.data.localPosition = data.localPosition + new Vector3(0, 0, -0.001f);
+            quadView.data.localEulerAngles = data.localEulerAngles;
+            quadView.data.localScale = data.localScale;
+            quadView.data.touchEnable = false;
+            quadView.data.material = VisionMaterial.Unlit;
+            quadView.data.uvOffsets = new Vector2[] { new Vector2(0, 0.25f), new Vector2(0, 0.25f) };
             quadgo.SetActive(false);
-            Tween t1 = DOTween.To(() => quad.localScale, x => quad.localScale = x, quad.localScale * Style.QuadSprinkleScale, Style.QuadSprinkleDuration).SetEase(Ease.OutCubic);
-            Tween t2 = DOTween.To(() => quad.localAlpha, x => quad.localAlpha = x, 0f, Style.QuadSprinkleDuration).SetEase(Ease.OutCubic);
+            Tween t1 = DOTween.To(() => quadView.data.localScale, x => quadView.data.localScale = x, quadView.data.localScale * Style.QuadSprinkleScale, Style.QuadSprinkleDuration).SetEase(Ease.OutCubic);
+            Tween t2 = DOTween.To(() => quadView.data.localAlpha, x => quadView.data.localAlpha = x, 0f, Style.QuadSprinkleDuration).SetEase(Ease.OutCubic);
             Sequence sequence = DOTween.Sequence();
             sequence.AppendInterval(spark.delay)
                     .AppendCallback(() => quadgo.SetActive(true))
@@ -109,29 +127,9 @@ public class QuadView : VisisonView<IQuad>
         {
             SimplePool.inst.Return(_meshType, _meshFilter.mesh);
         }
-        switch (data.value)
-        {
-            case QuadValue.Front:
-            case QuadValue.Back:
-                {
-                    _meshType = SimplePoolItemType.QuadMesh;
-                    break;
-                }
-            default:
-                {
-                    if ((data.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
-                    {
-                        _meshType = SimplePoolItemType.ArrowMesh;
-                    }
-                    break;
-                }
-        }
-        if (_meshType != SimplePoolItemType.None)
-        {
-            Mesh mesh = SimplePool.inst.Get<Mesh>(_meshType);
-            mesh.colors32 = Style.GetColors(data.value, data.alpha);
-            _meshFilter.mesh = mesh;
-        }
+        _meshType = SimplePoolItemType.QuadMesh;
+        _meshFilter.mesh = SimplePool.inst.Get<Mesh>(_meshType);
         data.localEulerAngles = Style.GetAngles(data.value);
+        data.uvOffsets = Style.GetQuadUVOffsets(data.value);
     }
 }

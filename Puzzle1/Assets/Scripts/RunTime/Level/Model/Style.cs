@@ -2,6 +2,8 @@
 
 public static class Style
 {
+    public const float PuzzleDepth = 20;
+
     public const float QuadSize = 1;
     public const float QuadGap = 0.1f;
 
@@ -22,34 +24,104 @@ public static class Style
     public const float QuadSprinkleDepthAddition = -5f;
     public const float QuadSprinkleDuration = 0.5f;
 
-    public const float PuzzleDepth = 20;
+    public static readonly Vector3[] QuadVertics = new Vector3[]
+    {
+        new Vector3(-QuadSize / 2, QuadSize / 2, 0),
+        new Vector3(QuadSize / 2, -QuadSize / 2, 0),
+        new Vector3(-QuadSize / 2, -QuadSize / 2, 0),
+        new Vector3(QuadSize / 2, QuadSize / 2, 0),
+
+        new Vector3(-QuadSize / 2, QuadSize / 2, 0),
+        new Vector3(QuadSize / 2, -QuadSize / 2, 0),
+        new Vector3(-QuadSize / 2, -QuadSize / 2, 0),
+        new Vector3(QuadSize / 2, QuadSize / 2, 0),  
+    };
+    public static readonly Vector2[] QuadUV = new Vector2[]
+    {
+        new Vector2(0, 1),
+        new Vector2(1, 0),
+        new Vector2(0, 0),
+        new Vector2(1, 1),
+
+        new Vector2(1, 1),
+        new Vector2(0, 0),
+        new Vector2(1, 0),
+        new Vector2(0, 1),
+    };
+    public static readonly Vector3[] QuadNormals = new Vector3[] 
+    { 
+        -Vector3.forward,
+        -Vector3.forward,
+        -Vector3.forward,
+        -Vector3.forward,
+
+        Vector3.forward,
+        Vector3.forward,
+        Vector3.forward,
+        Vector3.forward,
+    };
+    public static readonly Color32[] QuadColors = new Color32[]
+    {
+        new Color32(255, 255, 255, 255),
+        new Color32(255, 255, 255, 255),
+        new Color32(255, 255, 255, 255),
+        new Color32(255, 255, 255, 255),
+
+        new Color32(255, 255, 255, 255),
+        new Color32(255, 255, 255, 255),
+        new Color32(255, 255, 255, 255),
+        new Color32(255, 255, 255, 255),
+    };
+    public static readonly Vector2 QuadUVTilling = new Vector2(0.25f, 0.25f);
 
     public const string QuadUnifiedRotateId = "Rotate";
     public const string QuadUnifiedScaleId = "Scale";
 
+    private static Texture texture;
     private static Material unlit;
     private static Material particleAdd;
     private static Material diffuse;
 
+    private static Vector2[] quadNormalizedUV;
+
 
     public static Material GetQuadMaterial(VisionMaterial type)
     {
+        if (texture == null)
+        {
+            texture = Resources.Load<Texture>("Texture");
+        }
         Material material = null;
         switch (type)
         {
             case VisionMaterial.Unlit:
                 {
-                    material = unlit != null ? unlit : (unlit = new Material(Resources.Load<Shader>("QuadUnlit")));
+                    if (unlit == null)
+                    {
+                        unlit = new Material(Resources.Load<Shader>("QuadUnlit"));
+                        unlit.SetTexture("_MainTex", texture);
+                    }
+                    material = unlit;
                     break;
                 }
             case VisionMaterial.ParticleAdd:
                 {
-                    material = particleAdd != null ? particleAdd : (particleAdd = new Material(Resources.Load<Shader>("QuadParticleAdd")));
+                    if (particleAdd == null)
+                    {
+                        particleAdd = new Material(Resources.Load<Shader>("QuadParticleAdd"));
+                        particleAdd.SetTexture("_MainTex", texture);
+                    }
+                    material = particleAdd;
                     break;
                 }
             default:
                 {
-                    material = diffuse != null ? diffuse : (diffuse = new Material(Resources.Load<Shader>("QuadDiffuse")));
+                    if (diffuse == null)
+                    {
+                        diffuse = new Material(Resources.Load<Shader>("QuadDiffuse"));
+                        diffuse.SetTexture("_MainTex", texture);
+                    }
+                    material = diffuse;
                     break;
                 }
         }
@@ -63,31 +135,10 @@ public static class Style
         Mesh quadMesh = new Mesh();
         quadMesh.name = "QuadMesh";
         quadMesh.MarkDynamic();
-        Vector3[] vertices = new Vector3[]
-        {
-            new Vector3(-halfSize, halfSize, 0),
-            new Vector3(halfSize, -halfSize, 0),
-            new Vector3(-halfSize, -halfSize, 0),
-            new Vector3(halfSize, halfSize, 0),
-
-            new Vector3(-halfSize, halfSize, 0),
-            new Vector3(halfSize, -halfSize, 0),
-            new Vector3(-halfSize, -halfSize, 0),
-            new Vector3(halfSize, halfSize, 0),
-        };
-        Vector2[] uv = new Vector2[vertices.Length];
-        Vector3[] normals = new Vector3[vertices.Length];
-        Color32[] colors32 = new Color32[vertices.Length];
-        for (int i = vertices.Length - 1; i >= 0; i--)
-        {
-            uv[i] = i < 4 ? new Vector2(vertices[i].x / size + 0.5f, 0.5f - vertices[i].y / size) : new Vector2(0.5f - vertices[i].x / size, 0.5f - vertices[i].y / size);
-            normals[i] = i < 4 ? -Vector3.forward : Vector3.forward;
-            colors32[i] = Color.white;
-        }
-        quadMesh.vertices = vertices;
-        quadMesh.uv = uv;
-        quadMesh.normals = normals;
-        quadMesh.colors32 = colors32;
+        quadMesh.vertices = QuadVertics;
+        quadMesh.uv = QuadUV;
+        quadMesh.normals = QuadNormals;
+        quadMesh.colors32 = QuadColors;
         quadMesh.subMeshCount = 2;
         quadMesh.SetTriangles(new int[]
         {
@@ -102,89 +153,43 @@ public static class Style
         return quadMesh;
     }
 
-    public static Mesh GetArrowMesh()
+    /// <summary>
+    /// 正面和反面的UVOffset
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static Vector2[] GetQuadUVOffsets(QuadValue value)
     {
-        float size = QuadSize;
-        float up_y = size * 0.4f;
-        float down_y = -size * 0.3f;
-        float left_x = -size * 0.3f;
-        float right_x = size * 0.3f;
-        float center_y = -size * 0.1f;
-        Mesh arrowMesh = new Mesh();
-        arrowMesh.name = "ArrowMesh";
-        arrowMesh.MarkDynamic();
-        Vector3[] vertices = new Vector3[]
-        {
-            new Vector3(0, up_y, 0),
-            new Vector3(0, center_y, 0),
-            new Vector3(left_x, down_y, 0),
-            new Vector3(right_x, down_y, 0),
-
-            new Vector3(0, up_y, 0),
-            new Vector3(0, 0, 0),
-            new Vector3(left_x, down_y, 0),
-            new Vector3(right_x, down_y, 0),
-        };
-        Vector2[] uv = new Vector2[vertices.Length];
-        Vector3[] normals = new Vector3[vertices.Length];
-        Color32[] colors32 = new Color32[vertices.Length];
-        for (int i = vertices.Length - 1; i >= 0; i--)
-        {
-            uv[i] = i < 4 ? new Vector2(vertices[i].x / size + 0.5f, 0.5f - vertices[i].y / size) : new Vector2(0.5f - vertices[i].x / size, 0.5f - vertices[i].y / size);
-            normals[i] = i < 4 ? -Vector3.forward : Vector3.forward;
-            colors32[i] = Color.white;
-        }
-        arrowMesh.vertices = vertices;
-        arrowMesh.uv = uv;
-        arrowMesh.normals = normals;
-        arrowMesh.colors32 = colors32;
-        arrowMesh.subMeshCount = 2;
-        arrowMesh.SetTriangles(new int[]
-        {
-            0, 1, 2,
-            0, 3, 1,
-        }, 0);
-        arrowMesh.SetTriangles(new int[]
-        {
-            6, 5, 4,
-            5, 7, 4
-        }, 1);
-        return arrowMesh;
-    }
-
-    public static Color32[] GetColors(QuadValue value, float alpha = 1)
-    {
-        Color32[] colors = new Color32[8];
-        Color color1 = Color.white;
-        Color color2 = Color.white;
+        Vector2[] offsets = new Vector2[2];
         switch (value)
         {
             case QuadValue.Front:
                 {
-                    color1 = new Color(1, 0.5f, 0, alpha);
-                    color2 = new Color(0, 0.5f, 1, alpha);
+                    offsets[0] = new Vector2(0, 0);
+                    offsets[1] = new Vector2(0.25f, 0);
                     break;
                 }
             case QuadValue.Back:
                 {
-                    color1 = new Color(0, 0.5f, 1, alpha);
-                    color2 = new Color(1, 0.5f, 0, alpha);
+                    offsets[0] = new Vector2(0.25f, 0);
+                    offsets[1] = new Vector2(0, 0);
+                    break;
+                }
+            case QuadValue.Block:
+                {
+                    offsets[0] = offsets[1] = new Vector2(0.75f, 0);
                     break;
                 }
             default:
                 {
                     if ((value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
                     {
-                        color1 = color2 = new Color(0, 0.6f, 0, alpha);
+                        offsets[0] = offsets[1] = new Vector2(0.5f, 0);
                     }
                     break;
                 }
         }
-        for (int i = colors.Length - 1; i >= 0; i--)
-        {
-            colors[i] = i < 4 ? color1 : color2;
-        }
-        return colors;
+        return offsets;
     }
 
     public static Vector3 GetAngles(QuadValue value)
@@ -194,6 +199,7 @@ public static class Style
         {
             case QuadValue.Front:
             case QuadValue.Back:
+            case QuadValue.Block:
                 {
                     angles = Vector3.zero;
                     break;
@@ -240,10 +246,5 @@ public static class Style
                 }
         }
         return angles;
-    }
-
-    public static bool GetTouchEnable(QuadValue value)
-    {
-        return value != QuadValue.Block;
     }
 }

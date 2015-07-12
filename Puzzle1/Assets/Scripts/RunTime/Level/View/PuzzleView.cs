@@ -20,15 +20,12 @@ public class PuzzleView : VisisonView<IPuzzle>
         {
             for (int j = 0; j < data.columns; j++)
             {
-                if (data[i, j].value != QuadValue.Block)
-                {
-                    GameObject quadgo = new GameObject(string.Format("quad_{0}_{1}", i, j));
-                    quadgo.transform.parent = transform;
-                    data[i, j].localPosition = new Vector3(j * (Style.QuadSize + Style.QuadGap) + Style.QuadSize / 2 - center.x, center.y - i * (Style.QuadSize + Style.QuadGap) - Style.QuadSize / 2, 0);
-                    data[i, j].touchEnable = true;
-                    _quadViews[i, j] = quadgo.AddComponent<QuadView>();
-                    _quadViews[i, j].data = data[i, j];
-                }
+                GameObject quadgo = new GameObject(string.Format("quad_{0}_{1}", i, j));
+                quadgo.transform.parent = transform;
+                data[i, j].localPosition = new Vector3(j * (Style.QuadSize + Style.QuadGap) + Style.QuadSize / 2 - center.x, center.y - i * (Style.QuadSize + Style.QuadGap) - Style.QuadSize / 2, 0);
+                data[i, j].touchEnable = true;
+                _quadViews[i, j] = quadgo.AddComponent<QuadView>();
+                _quadViews[i, j].data = data[i, j];
             }
         }
     }

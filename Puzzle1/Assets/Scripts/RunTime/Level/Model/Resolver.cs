@@ -76,10 +76,11 @@ public class Resolver : IResolver
                 float qdelay = (Mathf.Abs(quad.column - op.column) - 1) * Style.QuadRollDelay;
                 if (quad.value == QuadValue.Block)
                 {
-                    //DOTween.Sequence().Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(0, Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
-                    //                  .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(0, -Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
-                    //                  .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles, Style.QuadShakeDuration * 0.5f).SetEase(Ease.OutBack))
-                    //                  .SetDelay(delay + qdelay);
+                    DOTween.Sequence().AppendInterval(delay + qdelay)
+                                      .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(0, Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
+                                      .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(0, -Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
+                                      .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles, Style.QuadShakeDuration * 0.5f)
+                                      .SetEase(Ease.OutBack));
                     break;
                 }
                 else if ((quad.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
@@ -122,6 +123,11 @@ public class Resolver : IResolver
                 float qdelay = (Mathf.Abs(quad.column - op.column) - 1) * Style.QuadRollDelay;
                 if (quad.value == QuadValue.Block)
                 {
+                    DOTween.Sequence().AppendInterval(delay + qdelay)
+                                      .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(0, -Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
+                                      .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(0, Style.QuadShakeAngle, 0), Style.QuadShakeDuration * 0.25f))
+                                      .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles, Style.QuadShakeDuration * 0.5f)
+                                      .SetEase(Ease.OutBack));
                     break;
                 }
                 else if ((quad.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
@@ -165,6 +171,11 @@ public class Resolver : IResolver
                 float qdelay = (Mathf.Abs(quad.row - op.row) - 1) * Style.QuadRollDelay;
                 if (quad.value == QuadValue.Block)
                 {
+                    DOTween.Sequence().AppendInterval(delay + qdelay)
+                                      .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(-Style.QuadShakeAngle, 0, 0), Style.QuadShakeDuration * 0.25f))
+                                      .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(Style.QuadShakeAngle, 0, 0), Style.QuadShakeDuration * 0.25f))
+                                      .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles, Style.QuadShakeDuration * 0.5f)
+                                      .SetEase(Ease.OutBack));
                     break;
                 }
                 else if ((quad.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)
@@ -207,6 +218,11 @@ public class Resolver : IResolver
                 float qdelay = (Mathf.Abs(quad.row - op.row) - 1) * Style.QuadRollDelay;
                 if (quad.value == QuadValue.Block)
                 {
+                    DOTween.Sequence().AppendInterval(delay + qdelay)
+                                      .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(Style.QuadShakeAngle, 0, 0), Style.QuadShakeDuration * 0.25f))
+                                      .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles + new Vector3(-Style.QuadShakeAngle, 0, 0), Style.QuadShakeDuration * 0.25f))
+                                      .Append(DOTween.To(() => quad.localEulerAngles, x => quad.localEulerAngles = x, quad.localEulerAngles, Style.QuadShakeDuration * 0.5f)
+                                      .SetEase(Ease.OutBack));
                     break;
                 }
                 else if ((quad.value & (QuadValue.Left | QuadValue.Right | QuadValue.Up | QuadValue.Down)) > 0)

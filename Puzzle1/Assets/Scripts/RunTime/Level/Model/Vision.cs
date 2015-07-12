@@ -15,6 +15,8 @@ public abstract class Vision : EventDispatcher, IVision
 
     private VisionMaterial _material;
 
+    private Vector2[] _uvOffsets;
+
     private bool _touchEnable;
 
     public Vision()
@@ -24,7 +26,8 @@ public abstract class Vision : EventDispatcher, IVision
         _localPosition = Vector3.zero;
         _localEulerAngles = Vector3.zero;
         _localScale = Vector3.one;
-        _material = VisionMaterial.Diffuse;
+        _material = VisionMaterial.Unlit;
+        _uvOffsets = new Vector2[] { Vector2.zero, Vector2.zero };
         _touchEnable = false;
     }
 
@@ -135,6 +138,22 @@ public abstract class Vision : EventDispatcher, IVision
             {
                 _material = value;
                 DispatchEvent(new VisionEvent(VisionEvent.MaterialChange));
+            }
+        }
+    }
+
+    public Vector2[] uvOffsets
+    {
+        get
+        {
+            return _uvOffsets;
+        }
+        set
+        {
+            if (_uvOffsets[0] != value[0] || _uvOffsets[1] != value[1])
+            {
+                _uvOffsets = value;
+                DispatchEvent(new VisionEvent(VisionEvent.UVOffsetsChange));
             }
         }
     }
